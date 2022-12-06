@@ -59,8 +59,12 @@ tspan = linspace( 0, T,1000);
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [ Tu, Yu ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options );
 
+[m  pos_u]=min(vecnorm(Yu(:,1:3),2,2));
+rp_u=Yu(pos_u,1:3);
+
 % behind
 r0=[-5*R_E; -Delta; 0 ];
+rp_b=[0; -rp; 0];
 y0=[r0; v_inf_minus];
 % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, T,1000);
@@ -68,8 +72,12 @@ tspan = linspace( 0, T,1000);
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [ Tb, Yb ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options );
 
+[m  pos_b]=min(vecnorm(Yb(:,1:3),2,2));
+rp_b=Yb(pos_b,1:3);
+
 % in front
 r0=[-5*R_E; Delta; 0 ];
+rp_f=[0;rp;0];
 y0=[r0;v_inf_minus];
 % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, T,1000);
@@ -77,6 +85,8 @@ tspan = linspace( 0, T,1000);
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [ Tf, Yf ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options );
 
+[m  pos_f]=min(vecnorm(Yf(:,1:3),2,2));
+rp_f=Yf(pos_f,1:3);
 %% 3d plotting
 figure(1)
 earth_sphere;
@@ -87,4 +97,7 @@ plot3( Yu(:,1), Yu(:,2), Yu(:,3), 'r-','LineWidth',2);
 plot3( Yb(:,1), Yb(:,2), Yb(:,3), 'g-', 'LineWidth',2);
 
 plot3( Yf(:,1), Yf(:,2), Yf(:,3), 'b-','LineWidth',2 );
-legend('Flyby under the planet', 'Flyby behind the planet','Flyby in front the planet')
+scatter3(rp_u(1), rp_u(2), rp_u(3));
+scatter3(rp_b(1), rp_b(2), rp_b(3));
+scatter3(rp_f(1), rp_f(2), rp_f(3));
+legend('','Flyby under the planet', 'Flyby behind the planet','Flyby in front the planet')
