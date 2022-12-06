@@ -125,9 +125,12 @@ options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 % plotting
 figure (2)
 grid on
+axis([-1.5 1.5 -0.5 1.5 -1 1]);
 plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, 'b-','LineWidth',2);
+axis([-1.5 1.5 -0.5 1.5 -1 1]);
 hold on
 plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, 'r-','LineWidth',2 );
+axis([-1.5 1.5 -0.5 1.5 -1 1]);
 hold on
 scatter3(0, 0 ,0 ,'yellow', 'filled');
-axis([-1.5 1.5 -1.5 1.5 -1 1]);
+axis([-1.5 1.5 -0.5 1.5 -1 1]);
