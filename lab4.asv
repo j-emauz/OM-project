@@ -12,9 +12,4 @@ v_inf_minus = [15.1; 0; 0]; % km/s
 Delta = 9200; %km 
 r_E= [1; 0; 0]*AU; % AU
 
-up = [0; 0; 1]; %under planet
-fp = [0; 1; 0]; %front planet
-bp = [0; -1; 0]; %behind planet
-
-
-u = cross(Delta*up, v_inf_minus)/norm(cross(Delta*up, v_inf_minus));
+u = Delta
