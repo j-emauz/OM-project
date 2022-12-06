@@ -38,7 +38,7 @@ delta_v_u = v_inf_plus_u - v_inf_minus;
 delta_v_f = v_inf_plus_f - v_inf_minus;
 delta_v_b = v_inf_plus_b - v_inf_minus;
 
-V_P = [0; 1; 0]*sqrt(mu_E/r_E);
+V_P = [0; 1; 0]*sqrt(mu_E/norm(r_E));
 V_plus_b = V_P + v_inf_plus_b;
 V_plus_f = V_P + v_inf_plus_f;
 V_plus_u = V_P + v_inf_plus_u;
@@ -64,7 +64,6 @@ rp_u=Yu(pos_u,1:3);
 
 % behind
 r0=[-5*R_E; -Delta; 0 ];
-rp_b=[0; -rp; 0];
 y0=[r0; v_inf_minus];
 % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, T,1000);
@@ -77,7 +76,6 @@ rp_b=Yb(pos_b,1:3);
 
 % in front
 r0=[-5*R_E; Delta; 0 ];
-rp_f=[0;rp;0];
 y0=[r0;v_inf_minus];
 % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, T,1000);
@@ -101,3 +99,20 @@ scatter3(rp_u(1), rp_u(2), rp_u(3));
 scatter3(rp_b(1), rp_b(2), rp_b(3));
 scatter3(rp_f(1), rp_f(2), rp_f(3));
 legend('','Flyby under the planet', 'Flyby behind the planet','Flyby in front the planet')
+
+%% heliocentric leg
+% time of integration
+T=3600*24*365/8;
+
+r0=r_E;
+y0=[r0;V_minus];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+tspan = linspace( 0, -T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ t, Y_helio_before ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+
+figure (2)
+plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, 'b-','LineWidth',2 );
+hold on
+scatter3(0, 0 ,0 ,'yellow', 'filled');
