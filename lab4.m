@@ -171,3 +171,163 @@ hold on
 plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, 'r-','LineWidth',2 );
 hold on
 scatter3(0, 0 ,0 ,'yellow', 'filled');
+
+
+
+%% % 1.b
+clc
+clear
+close all
+
+% constants
+mu_S = astroConstants(4);
+mu_E= astroConstants(13);
+AU = astroConstants(2);
+R_E=astroConstants(23);
+
+% data
+v_inf_minus = [15.1; 0; 0]; % km/s
+v_inf = norm(v_inf_minus);
+r_E= [1; 0; 0]*AU; % AU
+
+fp = [0; 1; 0]; %front planet
+
+a = -mu_E/(v_inf^2);
+V_P = [0; 1; 0]*sqrt(mu_S/norm(r_E));
+
+Delta_vect=0:0.1:40;
+for i=1:length(Delta_vect)
+Delta(i)=Delta_vect(i)*R_E; 
+uf = cross(Delta(i)*fp, v_inf_minus)/norm(cross(Delta(i)*fp, v_inf_minus));
+delta(i)= 2*atan2(-a, Delta(i));
+e(i)= 1/sin(delta(i)/2);
+rp(i) = a*(1-e(i));
+
+v_inf_plus(:,i) = v_inf_minus*cos(delta(i)) + cross(uf, v_inf_minus)*sin(delta(i)) + uf*(dot(uf, v_inf_minus))*(1-cos(delta(i)));
+
+delta_v(:,i) = v_inf_plus(:,i) - v_inf_minus;
+
+V_plus(:,i) = V_P + v_inf_plus(:,i);
+
+V_minus = V_P + v_inf_minus;
+
+end
+
+figure(1)
+plot(Delta_vect,rp/R_E)
+xlabel('Impact parameter \delta (over R_E)')
+ylabel('Flyby minimum altitude (over R_E)')
+figure(2)
+plot(Delta_vect,delta*180/pi)
+xlabel('Impact parameter Δ (over R_E)')
+ylabel('Turning angle [deg]')
+
+
+%% integrating
+clc
+% time of integration
+T=3600*1.5;
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+
+D=[9200,10200,11200,12200,13200];
+
+figure()
+earth_sphere;
+legend_entries={};
+for i=1:length(D)
+% in front
+r0=[-5*R_E; D(i); 0 ];
+y0=[r0;v_inf_minus];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+tspan = linspace( 0, T,1000);
+     % Set options for the ODE solver
+[ Tf, Yf ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options );
+
+[m  pos_f]=min(vecnorm(Yf(:,1:3),2,2));
+rp_f=Yf(pos_f,1:3);
+
+% 3d plotting
+
+grid on
+hold on;
+plot3( Yf(:,1), Yf(:,2), Yf(:,3), '-','LineWidth',2 );
+scatter3(rp_f(1), rp_f(2), rp_f(3));
+
+legend_entries{end+1}=[''];
+legend_entries{end+1}=['Δ_',num2str(i)];
+end
+
+legend(legend_entries);
+%% heliocentric leg
+% time of integration
+T=3600*24*365/4;
+
+D=[9200,10200,11200,12200,13200];
+
+%before flyby
+r0=r_E;
+y0=[r0;V_minus];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+tspan = linspace( 0, -T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ t, Y_helio_before ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+
+% after flyby
+r0=r_E;
+y0=[r0;V_plus_u];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+tspan = linspace( 0, T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ t, Y_helio_after ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+
+% plotting
+figure (2)
+grid on
+axis([-1.5 1.5 -1.5 1.5 -1 1]);
+plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, 'b-','LineWidth',2);
+axis([-1.5 1.5 -1.5 1.5 -1 1]);
+hold on
+plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, 'r-','LineWidth',2 );
+axis([-1.5 1.5 -1.5 1.5 -1 1]);
+hold on
+scatter3(0, 0 ,0 ,'yellow', 'filled');
+axis([-1.5 1.5 -1.5 1.5 -1 1]);
+
+
+% after flyby b
+r0=r_E;
+y0=[r0;V_plus_b];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+tspan = linspace( 0, T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ t, Y_helio_after ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+
+% plotting
+figure (3)
+grid on
+plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, 'b-','LineWidth',2);
+hold on
+plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, 'r-','LineWidth',2 );
+hold on
+scatter3(0, 0 ,0 ,'yellow', 'filled');
+
+% after flyby f
+r0=r_E;
+y0=[r0;V_plus_f];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+tspan = linspace( 0, T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ t, Y_helio_after ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+
+% plotting
+figure (4)
+grid on
+plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, 'b-','LineWidth',2);
+hold on
+plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, 'r-','LineWidth',2 );
+hold on
+scatter3(0, 0 ,0 ,'yellow', 'filled');
