@@ -17,4 +17,6 @@ fp = [0; 1; 0]; %front planet
 bp = [0; -1; 0]; %behind planet
 
 
-u = cross(Delta*up, v_inf_minus)/norm(cross(Delta*up, v_inf_minus));
+uu = cross(Delta*up, v_inf_minus)/norm(cross(Delta*up, v_inf_minus));
+uf = cross(Delta*fp, v_inf_minus)/norm(cross(Delta*fp, v_inf_minus));
+ub = cross(Delta*bp, v_inf_minus)/norm(cross(Delta*bp, v_inf_minus));
