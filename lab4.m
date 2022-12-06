@@ -31,3 +31,8 @@ rp = a*(1-e);
 v_inf_plus_u = v_inf_minus*cos(delta) + cross(uu, v_inf_minus)*sin(delta) + uu*(dot(uu, v_inf_minus))*(1-cos(delta));
 v_inf_plus_f = v_inf_minus*cos(delta) + cross(uf, v_inf_minus)*sin(delta) + uf*(dot(uf, v_inf_minus))*(1-cos(delta));
 v_inf_plus_b = v_inf_minus*cos(delta) + cross(ub, v_inf_minus)*sin(delta) + ub*(dot(ub, v_inf_minus))*(1-cos(delta));
+
+delta_v_u = v_inf_plus_u - v_inf_minus;
+delta_v_f = v_inf_plus_f - v_inf_minus;
+delta_v_b = v_inf_plus_b - v_inf_minus;
+
