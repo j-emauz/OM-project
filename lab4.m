@@ -134,3 +134,40 @@ axis([-1.5 1.5 -1.5 1.5 -1 1]);
 hold on
 scatter3(0, 0 ,0 ,'yellow', 'filled');
 axis([-1.5 1.5 -1.5 1.5 -1 1]);
+
+
+% after flyby b
+r0=r_E;
+y0=[r0;V_plus_b];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+tspan = linspace( 0, T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ t, Y_helio_after ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+
+% plotting
+figure (3)
+grid on
+plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, 'b-','LineWidth',2);
+hold on
+plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, 'r-','LineWidth',2 );
+hold on
+scatter3(0, 0 ,0 ,'yellow', 'filled');
+
+% after flyby f
+r0=r_E;
+y0=[r0;V_plus_f];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+tspan = linspace( 0, T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ t, Y_helio_after ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+
+% plotting
+figure (4)
+grid on
+plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, 'b-','LineWidth',2);
+hold on
+plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, 'r-','LineWidth',2 );
+hold on
+scatter3(0, 0 ,0 ,'yellow', 'filled');
