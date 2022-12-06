@@ -87,3 +87,4 @@ plot3( Yu(:,1), Yu(:,2), Yu(:,3), 'r-','LineWidth',2);
 plot3( Yb(:,1), Yb(:,2), Yb(:,3), 'g-', 'LineWidth',2);
 
 plot3( Yf(:,1), Yf(:,2), Yf(:,3), 'b-','LineWidth',2 );
+legend('Flyby under the planet', 'Flyby behind the planet','Flyby in front the planet')
