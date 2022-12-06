@@ -1,4 +1,5 @@
 % 1.a
+clc
 clear
 close all
 
@@ -36,3 +37,8 @@ delta_v_u = v_inf_plus_u - v_inf_minus;
 delta_v_f = v_inf_plus_f - v_inf_minus;
 delta_v_b = v_inf_plus_b - v_inf_minus;
 
+V_P = [0; 1; 0]*sqrt(mu_E/r_E);
+V_plus_b = V_P + v_inf_plus_b;
+V_plus_f = V_P + v_inf_plus_f;
+V_plus_u = V_P + v_inf_plus_u;
+V_minus = V_P + v_inf_minus;
