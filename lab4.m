@@ -307,3 +307,23 @@ legend_entries{end+1}=['Δ_',num2str(i)];
 end
 
 legend(legend_entries);
+
+%% ex 2
+clc
+clear
+close all
+
+% constants
+mu_S = astroConstants(4);
+mu_E= astroConstants(13);
+AU = astroConstants(2);
+R_E=astroConstants(23);
+
+V_minus = [31.5; 5.2; 0.0]; % km/s
+V_plus = [36.0; 0.0; 0.0]; % km/s
+r_E = [0; -1; 0]*AU; % AU
+V_P = [0; 1; 0]*sqrt(mu_S/norm(r_E));
+
+v_inf_min=V_minus-V_P;
+v_inf_plus=V_plus-V_P;
+delta=acos(dot(v_inf_min,-v_inf_plus)/(norm(v_inf_min)*norm(v_inf_plus)));
