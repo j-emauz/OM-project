@@ -195,9 +195,10 @@ fp = [0; 1; 0]; %front planet
 a = -mu_E/(v_inf^2);
 V_P = [0; 1; 0]*sqrt(mu_S/norm(r_E));
 
-Delta_vect=0:0.1:40;
-for i=1:length(Delta_vect)
-Delta(i)=Delta_vect(i)*R_E; 
+Delta=0:200:40*R_E;
+Delta_vect = Delta/R_E;
+for i=1:length(Delta)
+%Delta(i)=Delta_vect(i)*R_E; 
 uf = cross(Delta(i)*fp, v_inf_minus)/norm(cross(Delta(i)*fp, v_inf_minus));
 delta(i)= 2*atan2(-a, Delta(i));
 e(i)= 1/sin(delta(i)/2);
@@ -282,7 +283,7 @@ options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 
 % after flyby
 r0=r_E;
-y0=[r0;V_plus(Delta_vect*R_E==D(i))];
+y0=[r0;V_plus(Delta_vect==D(i))];
 % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, T,1000);
      % Set options for the ODE solver
