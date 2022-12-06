@@ -172,7 +172,7 @@ plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, 'r-'
 hold on
 scatter3(0, 0 ,0 ,'yellow', 'filled');
 
-
+pause(2)
 
 %% % 1.b
 clc
@@ -259,18 +259,18 @@ legend_entries{end+1}=['Δ_',num2str(i)];
 end
 
 legend(legend_entries);
+
+
 %% heliocentric leg
 clc
 % time of integration
-T=3600*1.5;
+T=3600*24*365/2;
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 
 D=[9200,10200,11200,12200,13200];
 
-figure()
-earth_sphere;
 legend_entries={};
-for i=1:length(D)
+figure()
 
 %before flyby
 r0=r_E;
@@ -280,14 +280,30 @@ tspan = linspace( 0, -T,1000);
      % Set options for the ODE solver
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [ t, Y_helio_before ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, '-','LineWidth',2);
+hold on
+grid on
+scatter3(0, 0 ,0 ,100, 'yellow', 'filled');
+hold on
+legend_entries{1}=['Orbit before flyby'];
+legend_entries{2}=[''];
+
+for i=1:length(D)
 
 % after flyby
 r0=r_E;
-y0=[r0;V_plus(Delta_vect==D(i))];
+y0=[r0;V_plus(:,find(Delta==D(i)))];
 % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, T,1000);
      % Set options for the ODE solver
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [ t, Y_helio_after ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
 
+plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, '-','LineWidth',2 );
+hold on
+
+% legend_entries{end+1}=[''];
+legend_entries{end+1}=['Δ_',num2str(i)];
 end
+
+legend(legend_entries);
