@@ -42,3 +42,44 @@ V_plus_b = V_P + v_inf_plus_b;
 V_plus_f = V_P + v_inf_plus_f;
 V_plus_u = V_P + v_inf_plus_u;
 V_minus = V_P + v_inf_minus;
+
+
+%% integrating
+
+%under
+r0=[-5;0; Delta];
+y0=[r0';v_inf_minus'];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+T=3600;
+tspan = linspace( 0, T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ Tu, Yu ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options );
+
+% behind
+r0=[-5; -Delta; 0 ];
+y0=[r0'; v_inf_minus'];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+T=3600;
+tspan = linspace( 0, T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ Tb, Yb ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options );
+
+% in front
+r0=[-5; Delta; 0 ];
+y0=[r0';v_inf_minus'];
+% T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
+T=3600;
+tspan = linspace( 0, T,1000);
+     % Set options for the ODE solver
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ Tf, Yf ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options );
+
+%% 3d plotting
+figure()
+earth_sphere;
+hold on;
+plot3( Yu(:,1), Yu(:,2), Yu(:,3), '-' );
+plot3( Yb(:,1), Yb(:,2), Yb(:,3), '-' );
+plot3( Yf(:,1), Yf(:,2), Yf(:,3), '-' );
