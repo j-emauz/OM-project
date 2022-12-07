@@ -352,10 +352,22 @@ vp_minus=sqrt(2*mu_E*(1/rp-1/(2*a_minus)));
 vp_plus=sqrt(2*mu_E*(1/rp-1/(2*a_plus)));
 Delta_vp=vp_plus-vp_minus;
 
-%Plot the planetocentric hyperbolic arcs:
-
-T=3600*24*365/2;
+% %Plot the planetocentric hyperbolic arcs:
+earth_sphere
+hold on
+grid on
+T=3600*2;
+y0=[rp*[1;0;0]; vp_minus*[0;1;0]];
 tspan = linspace( 0, -T,1000);
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-[ t, Y_planet_before ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options);
-plot3( Y_planet_before(:,1)/AU, Y_planet_before(:,2)/AU, Y_planet_before(:,3)/AU, '-','LineWidth',2);
+[t, Y_planet_before ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options);
+plot3( Y_planet_before(:,1), Y_planet_before(:,2), Y_planet_before(:,3), '-','LineWidth',2);
+hold on
+
+T=3600*2;
+y0=[rp*[1;0;0]; vp_plus*[0;1;0]];
+tspan = linspace( 0, T,1000);
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[t, Y_planet_before ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options);
+plot3( Y_planet_before(:,1), Y_planet_before(:,2), Y_planet_before(:,3), '-','LineWidth',2);
+
