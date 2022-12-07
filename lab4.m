@@ -310,8 +310,6 @@ legend(legend_entries);
 hold off
 
 %% ex 2
-clc
-close all
 
 % constants
 mu_S = astroConstants(4);
@@ -391,8 +389,6 @@ y=0*x;
 plot(x,y,'--k',LineWidth=2);
 axis([-5*R_E 5*R_E -10*R_E 10*R_E]);
 %% heliocentric leg
-close all
-clc
 
 figure()
 earth_sphere('AU')
