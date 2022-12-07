@@ -310,8 +310,6 @@ legend(legend_entries);
 hold off
 
 %% ex 2
-clc
-close all
 
 % constants
 mu_S = astroConstants(4);
