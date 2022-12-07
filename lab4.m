@@ -307,6 +307,7 @@ legend_entries{end+1}=['Δ_',num2str(i)];
 end
 
 legend(legend_entries);
+hold off
 
 %% ex 2
 
@@ -371,3 +372,7 @@ options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [t, Y_planet_before ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options);
 plot3( Y_planet_before(:,1), Y_planet_before(:,2), Y_planet_before(:,3), '-','LineWidth',2);
 
+hold on
+x=-4*R_E:rp;
+y= -tan(acos(-1/ecc_minus(rp)))*x+a_minus+rp;
+plot(x,y)
