@@ -58,18 +58,20 @@ ArrivalTime_min_dv=mjd20002date(tspan2(z));
 
 
 %% OPTIMAL SOLUTION - 1st ARC
-[kepEarth_dep,~] = uplanet(DepartureTime_min_dv, p1); % position of Earth at departure time
-[kepEarth_fb,~] = uplanet(FlyBy_Time_min_dv, p1); % position of Earth at fly by time
-[kepSaturn_dep,~] = uplanet(DepartureTime_min_dv, p2); % position of Saturn at departure time
-[kepSaturn_fb,~]= uplanet(FlyBy_Time_min_dv, p2); % position of Saturn at fly by
-[kepSaturn_arr,~]= uplanet(ArrivalTime_min_dv, p2); % position of Saturn at arrival
+[kepEarth_dep,~] = uplanet(tspan1(x), p1); % position of Earth at departure time
+[kepEarth_fb,~] = uplanet(tspanGA(y), p1); % position of Earth at fly by time
+[kepSaturn_dep,~] = uplanet(tspan1(x), p2); % position of Saturn at departure time
+[kepSaturn_fb,~]= uplanet(tspanGA(y), p2); % position of Saturn at fly by
+[kepSaturn_arr,~]= uplanet(tspan2(z), p2); % position of Saturn at arrival
 
-[kepNEO_fb,mass,M,d] = ephNEO(FlyBy_Time_min_dv,86);
-[kepNEO_arr,mass,M,d] = ephNEO(ArrivalTime_min_dv,86);
+[kepNEO_fb,~,~] = ephNEO(tspanGA(y),86);
+[kepNEO_arr,mass,M] = ephNEO(tspan2(z),86);
 
 [car_Earth_dep, v_Earth_dep] = par2car(kepEarth_dep(1), kepEarth_dep(2), kepEarth_dep(3), kepEarth_dep(4), kepEarth_dep(5), kepEarth_dep(6), mu_S);
 [car_Earth_fb, v_Earth_fb] = par2car(kepEarth_fb(1), kepEarth_fb(2),kepEarth_fb(3), kepEarth_fb(4), kepEarth_fb(5), kepEarth_fb(6), mu_S);
 [car_Saturn_dep, v_Saturn_dep] = par2car(kepSaturn_dep(1),kepSaturn_dep(2),kepSaturn_dep(3),kepSaturn_dep(4), kepSaturn_dep(5), kepSaturn_dep(6), mu_S);
+[car_Saturn_fb, v_Saturn_fb] = par2car(kepSaturn_fb(1),kepSaturn_fb(2),kepSaturn_fb(3),kepSaturn_fb(4), kepSaturn_fb(5), kepSaturn_fb(6), mu_S);
+
 % car is used into the Lambert function and in y0
 
 % position of planets at BEGINNING of departure and arrival windows
@@ -92,72 +94,67 @@ options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
 % 1 Tranfer orbit arc
 a = A; % Semi-major axis of the transfer orbit [km]
 tspan = linspace(0, tspanGA(y)-tspan1(x), 1000); %ToF
-y0_t = [car_Earth_dep(1:3); VI.'];
+y0_t = [car_Earth_dep; VI.'];
 % velocity of the transfer orbit in the first optimal point
-[ t_t1, y_t1 ] = ode45(@(t_t, y_t) ode_2bp(t_t, y_t, mu), tspan, y0_t, options);
+[ t_t1, y_t1 ] = ode45(@(t_t, y_t) ode_2bp(t_t, y_t, mu_S), tspan, y0_t, options);
 
-% 2 Tranfer orbit full
-T = 2*pi*sqrt( a^3/mu ); % Orbital period [1/s]
+
+% 2 Earth orbit during transfer
+tspan = linspace(0, tspanGA(y)-tspan1(x), 1000);
+y0_1 = [car_Earth_dep; v_Earth_dep]; % optimal point on Earth orbit
+[ t_1, y_1 ] = ode45(@(t_1, y_1) ode_2bp(t_1, y_1, mu_S), tspan, y0_1, options);
+
+% 3 Earth orbit
+a = kepEarth_dep(1); % Semi-major axis [km]
+T = 2*pi*sqrt( a^3/mu_S ); % Orbital period [1/s]
 tspan = linspace( 0, T, 1000 );
-[ t_tt, y_tt] = ode45(@(t_tt, y_tt) ode_2bp(t_tt, y_tt, mu), tspan, y0_t, options);
+y0_1 = [car_Earth_dep; v_Earth_dep];
+[ t_1t, y_1t ] = ode45(@(t_1t, y_1t) ode_2bp(t_1t, y_1t, mu_S), tspan, y0_1, options);
 
-% 3 Earth orbit during transfer
-tspan = linspace(0, dt, 1000);
-y0_1 = [car_1; v_1]; % optimal point on Earth orbit
-[ t_1, y_1 ] = ode45(@(t_1, y_1) ode_2bp(t_1, y_1, mu), tspan, y0_1, options);
+% % 5 Earth departure window
+% T = (t12-t11)*24*3600; % duration of the departure window
+% tspan = linspace( 0, T, 100 );
+% y0_1 = [car_11; v_11];
+% [ t_111, y_111 ] = ode45(@(t_111, y_111) ode_2bp(t_111, y_111, mu), tspan, y0_1, options);
+% % first point on the departure window, which started at t_11
 
-% 4 Earth orbit
-a = kep_1(1); % Semi-major axis [km]
-T = 2*pi*sqrt( a^3/mu ); % Orbital period [1/s]
+% 4 Saturn orbit during transfer
+tspan = linspace( 0, tspanGA(y)-tspan1(x), 1000 );
+y0_2 = [car_Saturn_dep; v_Saturn_dep];
+[ t_2, y_2 ] = ode45(@(t_2, y_2) ode_2bp(t_2, y_2, mu_S), tspan, y0_2, options);
+
+% 5 Saturn orbit
+a = kepSaturn_dep(1); % Semi-major axis [km]
+T = 2*pi*sqrt( a^3/mu_S ); % Orbital period [1/s]
 tspan = linspace( 0, T, 1000 );
-y0_1 = [car_1; v_1];
-[ t_11, y_11 ] = ode45(@(t_11, y_11) ode_2bp(t_11, y_11, mu), tspan, y0_1, options);
+y0_2 = [car_Saturn_dep; v_Saturn_dep];
+[ t_22, y_22 ] = ode45(@(t_22, y_22) ode_2bp(t_22, y_22, mu_S), tspan, y0_2, options);
 
-% 5 Earth departure window
-T = (t12-t11)*24*3600; % duration of the departure window
-tspan = linspace( 0, T, 100 );
-y0_1 = [car_11; v_11];
-[ t_111, y_111 ] = ode45(@(t_111, y_111) ode_2bp(t_111, y_111, mu), tspan, y0_1, options);
-% first point on the departure window, which started at t_11
-
-% 6 Saturn orbit during transfer
-tspan = linspace( 0, dt, 1000 );
-y0_2 = [car_2; v_2];
-[ t_2, y_2 ] = ode45(@(t_2, y_2) ode_2bp(t_2, y_2, mu), tspan, y0_2, options);
-
-% 7 Mars orbit
-a = kep_2(1); % Semi-major axis [km]
-T = 2*pi*sqrt( a^3/mu ); % Orbital period [1/s]
-tspan = linspace( 0, T, 1000 );
-y0_2 = [car_2; v_2];
-[ t_22, y_22 ] = ode45(@(t_22, y_22) ode_2bp(t_22, y_22, mu), tspan, y0_2, options);
-
-% 8 Mars orbit arrival window
+% 6 Saturn orbit arrival window
 T = (t22-t21)*24*3600;
 tspan = linspace( 0, T, 1000 );
 y0_222 = [car_21; v_21];
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
-[ t_222, y_222 ] = ode45(@(t_222, y_222) ode_2bp(t_222, y_222, mu), tspan, y0_222, options);
+[ t_222, y_222 ] = ode45(@(t_222, y_222) ode_2bp(t_222, y_222, mu_S), tspan, y0_222, options);
 
 
 %% PLOT
 
 figure()
 hold on
-plot3( y_tt(:,1), y_tt(:,2), y_tt(:,3), '--g') % total transfer orbit
-plot3( y_t(:,1), y_t(:,2), y_t(:,3), '-g') % arc of transfer orbit
-plot3( y_11(:,1), y_11(:,2), y_11(:,3), '--b') % total Earth orbit
+plot3( y_t1(:,1), y_t1(:,2), y_t1(:,3), '-g') % arc of transfer orbit
+plot3( y_1t(:,1), y_1t(:,2), y_1t(:,3), '--b') % total Earth orbit
 plot3( y_1(:,1), y_1(:,2), y_1(:,3), '-b') %Earth motion during transfer
 plot3( y_22(:,1), y_22(:,2), y_22(:,3), '--r') %total Saturn orbit
 plot3( y_2(:,1), y_2(:,2), y_2(:,3), '-r') %Saturn motion during transfer
-h1=plot3( y_111(:,1), y_111(:,2), y_111(:,3),'-b', 'LineWidth',20); %departure window
+% h1=plot3( y_111(:,1), y_111(:,2), y_111(:,3),'-b', 'LineWidth',20); %departure window
 h1.Color(4) = 0.25;
 h2=plot3( y_222(:,1), y_222(:,2), y_222(:,3),'-r','LineWidth',20); %arrival window
 h2.Color(4) = 0.25;
 
 % drawing planets
-scatter3(car_1(1), car_1(2), car_1(3), 100, 'filled', 'b') %optimal point of Earth orbit
-scatter3(car_2(1), car_2(2), car_2(3), 120,  'filled', 'r') %optimal point of Saturn orbit
+scatter3(car_Earth_dep(1), car_Earth_dep(2), car_Earth_dep(3), 100, 'filled', 'b') %optimal point of Earth orbit
+scatter3(car_Saturn_fb(1), car_Saturn_fb(2), car_Saturn_fb(3), 120,  'filled', 'r') %optimal point of Saturn orbit
 scatter3(y_1(end,1), y_1(end,2), y_1(end,3), 90, 'filled', 'b') % final point of the Earth motion during transfer
 scatter3(y_2(end,1), y_2(end,2), y_2(end,3), 120,  'filled', 'r') % final point of the Saturn motion during transfer
 scatter3(0, 0, 0, 1000,  'filled', 'y') % Sun

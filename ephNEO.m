@@ -1,5 +1,5 @@
-function [kep,mass,M,d] = ephNEO(time,id)
-
+function [kep,mass,M] = ephNEO(time,id)
+%there was d as additional output
 % ephNEO.m - Ephemerides of Near Earth Objects
 %
 % PROTOTYPE:
