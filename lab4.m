@@ -341,7 +341,12 @@ delta=acos(dot(v_inf_minus,v_inf_plus)/(norm(v_inf_minus)*norm(v_inf_plus)));
 rp=fzero(fun,R_E+2000);
 % b=[1000:9000]';
 % plot(b,fun(b));
-h_atm=100; %km 
+h_atm=100; %km Karman line
 if rp<R_E+h_atm 
     error('rp obtained is not physically feasible')
 end 
+
+a_minus=rp/(1-ecc_minus);
+a_plus=rp/(1-ecc_plus);
+vp_minus=sqrt(2*mu_E*(1/rp-1/(2*a_minus)));
+vp_plus=sqrt(2*mu_E*(1/rp-1/(2*a_plus)));
