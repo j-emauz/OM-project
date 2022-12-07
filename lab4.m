@@ -379,13 +379,17 @@ hold on
 
 x= -4 *R_E  : rp-a_minus;
 y= -tan(acos(-1/ecc_minus(rp)))*(x+a_minus-rp);
-plot(x,y,'b-')
+plot(x,y,'b-',LineWidth=2);
 
 hold on
-x=-4*R_E  : rp-a_plus;
+x=-4*R_E:rp-a_plus;
 y= tan(acos(-1/ecc_plus(rp)))*(x+a_plus-rp);
-plot(x,y,'r-')
+plot(x,y,'r-',LineWidth=2);
 
+x=-6*R_E:6*R_E;
+y=0*x;
+plot(x,y,'--k',LineWidth=2);
+axis([-5*R_E 5*R_E -10*R_E 10*R_E]);
 %% heliocentric leg
 close all
 clc
