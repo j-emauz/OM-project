@@ -371,8 +371,10 @@ tspan = linspace( 0, T,1000);
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [t, Y_planet_before ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options);
 plot3( Y_planet_before(:,1), Y_planet_before(:,2), Y_planet_before(:,3), '-','LineWidth',2);
-
+xlabel('x [R_E]');
+ylabel('y [R_E]');
+zlabel('z [R_E]');
 hold on
-x=-4*R_E:rp;
-y= -tan(acos(-1/ecc_minus(rp)))*x+a_minus+rp;
-plot(x,y)
+x=-5*R_E:rp-a_minus;
+y= -tan(acos(-1/ecc_minus(rp)))*(x-rp+a_minus);
+plot(x,y,LineWidth=2);
