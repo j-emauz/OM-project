@@ -320,11 +320,11 @@ R_E=astroConstants(23);
 V_minus = [31.5; 5.2; 0.0]; % km/s
 V_plus = [36.0; 0.0; 0.0]; % km/s
 r_E = [0; -1; 0]*AU; % AU
-V_P = [0; 1; 0]*sqrt(mu_S/norm(r_E));
+V_P = [1; 0; 0]*sqrt(mu_S/norm(r_E));
 
 v_inf_minus=V_minus-V_P;
 v_inf_plus=V_plus-V_P;
-delta=acos(dot(v_inf_minus,-v_inf_plus)/(norm(v_inf_minus)*norm(v_inf_plus)));
+delta=acos(dot(v_inf_minus,v_inf_plus)/(norm(v_inf_minus)*norm(v_inf_plus)));
 
 
 
@@ -341,3 +341,7 @@ delta=acos(dot(v_inf_minus,-v_inf_plus)/(norm(v_inf_minus)*norm(v_inf_plus)));
 rp=fzero(fun,R_E+2000);
 % b=[1000:9000]';
 % plot(b,fun(b));
+h_atm=100; %km 
+if rp<R_E+h_atm 
+    error('rp obtained is not physically feasible')
+end 
