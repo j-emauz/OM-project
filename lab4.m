@@ -391,8 +391,6 @@ y=0*x;
 plot(x,y,'--k',LineWidth=2);
 axis([-5*R_E 5*R_E -10*R_E 10*R_E]);
 %% heliocentric leg
-close all
-clc
 
 figure()
 earth_sphere('AU')
