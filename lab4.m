@@ -343,10 +343,19 @@ rp=fzero(fun,R_E+2000);
 % plot(b,fun(b));
 h_atm=100; %km Karman line
 if rp<R_E+h_atm 
-    error('rp obtained is not physically feasible')
+    error('radius of pericentre obtained is not physically feasible')
 end 
 
-a_minus=rp/(1-ecc_minus);
-a_plus=rp/(1-ecc_plus);
+a_minus=rp/(1-ecc_minus(rp));
+a_plus=rp/(1-ecc_plus(rp));
 vp_minus=sqrt(2*mu_E*(1/rp-1/(2*a_minus)));
 vp_plus=sqrt(2*mu_E*(1/rp-1/(2*a_plus)));
+Delta_vp=vp_plus-vp_minus;
+
+%Plot the planetocentric hyperbolic arcs:
+
+T=3600*24*365/2;
+tspan = linspace( 0, -T,1000);
+options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+[ t, Y_planet_before ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options);
+plot3( Y_planet_before(:,1)/AU, Y_planet_before(:,2)/AU, Y_planet_before(:,3)/AU, '-','LineWidth',2);
