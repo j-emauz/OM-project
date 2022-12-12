@@ -144,7 +144,7 @@ figure()
 hold on
 plot3( y_t1(:,1), y_t1(:,2), y_t1(:,3), '-g') % arc of transfer orbit
 plot3( y_1t(:,1), y_1t(:,2), y_1t(:,3), '--b') % total Earth orbit
-plot3( y_1(:,1), y_1(:,2), y_1(:,3), '-b') %Earth motion during transfer
+plot3( y_1(:,1), y_1(:,2), y_1(:,3), '-b') % Earth motion during transfer
 plot3( y_22(:,1), y_22(:,2), y_22(:,3), '--r') %total Saturn orbit
 plot3( y_2(:,1), y_2(:,2), y_2(:,3), '-r') %Saturn motion during transfer
 % h1=plot3( y_111(:,1), y_111(:,2), y_111(:,3),'-b', 'LineWidth',20); %departure window
@@ -161,6 +161,7 @@ scatter3(0, 0, 0, 1000,  'filled', 'y') % Sun
 
 xlabel('X [km]'); ylabel('Y [km]'); zlabel('Z [km]');
 title('Transfer problem');
-legend('transfer orbit', 'transfer arc', 'initial orbit', 'initial orbit during transfer', 'final orbit', 'final orbit during transfer','Departure window','Arrival window')
+legend('transfer arc', 'Earth orbit','Earth orbit during transfer', 'Saturn orbit', 'Saturn orbit during transfer','Arrival window',...
+    '','','','','');
 axis equal;
 grid on;
