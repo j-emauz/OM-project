@@ -7,14 +7,14 @@ mu_S = astroConstants(4);
 mu_E= astroConstants(13);
 AU= astroConstants(2);
 
-% data
+% date
 dept1=[2028,01,30,0,0,0];
 dept2=[2030,01,30,0,0,0]; % random value
 arrt1=[2043,07,28,0,0,0]; % random value
-arrt2=[2062,07,28,0,0,0];
+arrt2=[2062,07,28,0,0,0]; % latest arrival on the asteroid
 
-GA_time_min=[2031,01,30,0,0,0]; %assumption
-GA_time_max=[2038,01,30,0,0,0]; 
+GA_time_min=[2032,01,30,0,0,0]; %assumption for fly-by window
+GA_time_max=[2033,01,30,0,0,0]; %assumption for fly-by window
 
 %date2mjd2000
 %conversion to Modern Julian Date 2000
@@ -28,8 +28,7 @@ tGA2= date2mjd2000(GA_time_max);
 tspan1 = linspace(t11, t12, 100); %departure window
 tspan2 = linspace(t21, t22, 100); %arrival window
 % was 500
-tspanGA=linspace(tGA1, tGA2, 100);
-
+tspanGA=linspace(tGA1, tGA2, 100); % fly-by window
 
 p1=3; %Earth
 p2=6; %Saturn
@@ -50,8 +49,8 @@ m1=min(dv_tot);
 m2=min(min(dv_tot));
 m3=min(min(min(dv_tot)));
 
-[x,y,z]=find(dv_tot==m3);
-
+% [x,y,z,val]=find(dv_tot==m3);
+[x,y,z] = ind2sub(size(dv_tot),dv_tot==m3);
 DepartureTime_min_dv=mjd20002date(tspan1(x));
 FlyBy_Time_min_dv=mjd20002date(tspanGA(y));
 ArrivalTime_min_dv=mjd20002date(tspan2(z));
@@ -81,7 +80,8 @@ ArrivalTime_min_dv=mjd20002date(tspan2(z));
 [car_21, v_21] = par2car(kep_21(1), kep_21(2), kep_21(3), kep_21(4), kep_21(5), kep_21(6), mu_S);
 
 % calculating transfer orbit BETWEEN THE OPTIMAL POINTS
-[A,P,E,ERROR,VI,VF,TPAR,THETA] = lambertMR(car_Earth_dep, car_Saturn_fb, tspanGA(y)-tspan1(x), mu_S, 0, 0, 0 );
+[A,P,E,ERROR,VI,VF,TPAR,THETA] = lambertMR(car_Earth_dep, car_Saturn_fb, tspanGA(y)-tspan1(x), mu_S, 0, 2, 2 );
+%[A,P,E,ERROR,VI,VF,TPAR,THETA] = lambertMR(RI,RF,TOF,MU,orbitType,Nrev,Ncase,optionsLMR)
 %                 [kepNEO,mass,M,d] = ephNEO(time,86);
 %                 [kepEarth,~] = uplanet(mjd2000, 3);
 %                 [kepSaturn,~] = uplanet(mjd2000, 6);
@@ -92,12 +92,10 @@ ArrivalTime_min_dv=mjd20002date(tspan2(z));
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
 
 % 1 Tranfer orbit arc
-a = A; % Semi-major axis of the transfer orbit [km]
 tspan = linspace(0, tspanGA(y)-tspan1(x), 1000); %ToF
 y0_t = [car_Earth_dep; VI.'];
 % velocity of the transfer orbit in the first optimal point
 [ t_t1, y_t1 ] = ode45(@(t_t, y_t) ode_2bp(t_t, y_t, mu_S), tspan, y0_t, options);
-
 
 % 2 Earth orbit during transfer
 tspan = linspace(0, tspanGA(y)-tspan1(x), 1000);
@@ -139,6 +137,7 @@ options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
 
 
 %% PLOT
+clc
 
 figure()
 hold on
@@ -156,7 +155,7 @@ h2.Color(4) = 0.25;
 scatter3(car_Earth_dep(1), car_Earth_dep(2), car_Earth_dep(3), 100, 'filled', 'b') %optimal point of Earth orbit
 scatter3(car_Saturn_fb(1), car_Saturn_fb(2), car_Saturn_fb(3), 120,  'filled', 'r') %optimal point of Saturn orbit
 scatter3(y_1(end,1), y_1(end,2), y_1(end,3), 90, 'filled', 'b') % final point of the Earth motion during transfer
-scatter3(y_2(end,1), y_2(end,2), y_2(end,3), 120,  'filled', 'r') % final point of the Saturn motion during transfer
+scatter3(y_2(end,1), y_2(end,2), y_2(end,3), 120,  'filled', 'g') % final point of the Saturn motion during transfer
 scatter3(0, 0, 0, 1000,  'filled', 'y') % Sun
 
 xlabel('X [km]'); ylabel('Y [km]'); zlabel('Z [km]');
