@@ -15,5 +15,20 @@ kep0 = [7571, 0.01, 87.9 *pi/180, 180 *pi/180, 180 *pi/180, 0 *pi/180];
 T = 2*pi*sqrt( kep0(1)^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, 100*T, 1000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
-[ T, S ] = ode113( @(t,s) eq_motion( t, s, @(t,s) acc_pert_fun(t,s,mu_E,J2,R_E), mu_E,J2,R_E ), tspan, kep0, options );
+[ T_Gauss, S_Gauss ] = ode45(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun(t,s,mu_E,J2,R_E), mu_E), tspan, kep0, options );
 % Analyse and plot the results
+
+
+options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
+[ T_J2, S_J2 ] = ode113(@(t,s) perturbed_ode_2bp(t,s, mu_E, J2, R_E), tspan, [car0;v], options );
+for k=1:size(S_J2,1)
+   [a(k),e(k),i(k),OM(k),om(k),th(k),~]=car2par(S_J2(k,1:3)', S_J2(k,4:6)',mu_E);
+%[a,e,i,OM,om,th, ee]=car2par(rr,vv,mu)
+%@(t_tt, y_tt) ode_2bp(t_tt, y_tt, mu), tspan, y0_t, options);
+end
+
+%% plotting
+
+% plot(T_J2,a);
+% hold on
+plot(T_Gauss,S_Gauss(1))
