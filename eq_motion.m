@@ -1,6 +1,7 @@
-function ds = eq_motion( t, s, acc_pert_fun, mu)
+function ds = eq_motion( t, s, acc_pert_fun, mu,J2,R)
 % Evaluate the perturbing accelerations
-acc_pert = acc_pert_fun( t, s );
+
+acc_pert = acc_pert_fun( t, s ,mu,J2,R);
 % Evaluate the equations of motion (Cartesian or Keplerian),
 % function of t, s, acc_pert_vec, and parameters
 
