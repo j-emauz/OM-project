@@ -10,8 +10,8 @@ v = y(4:6);
 % Distance from the primary
 rnorm = norm(r);
 % Set the derivatives of the state
-dy = [ v
-(-mu/rnorm^3)*r ];
+ds = [ v
+(-mu/rnorm^3)*r + acc_pert_vec];
 
 
 
