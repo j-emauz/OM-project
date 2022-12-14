@@ -7,11 +7,23 @@ mu_S = astroConstants(4);
 mu_E= astroConstants(13);
 AU= astroConstants(2);
 
-% date
-dept1=[2028,01,30,0,0,0];
-dept2=[2030,01,30,0,0,0]; % random value
+% dates
+dept1=[2028,01,30,0,0,0]; %GIVEN
+arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
+
+% synodic period
+a_Saturn=9.5826*AU;
+T_Saturn = 2*pi*sqrt( a_Saturn^3/mu_S ); % Orbital period [1/s]
+a_Earth=149598023;
+T_Earth=2*pi*sqrt( a_Earth^3/mu_S );
+Tsyn_ES=T_Saturn*T_Earth/(abs(T_Saturn-T_Earth));
+
+dept2_mjd2000 = date2mjd2000(dept1)+5*Tsyn_ES/3600/24;
+dept2=mjd20002date(dept2_mjd2000);
+% dept2=[2030,01,30,0,0,0];  % random
+
 arrt1=[2043,07,28,0,0,0]; % random value
-arrt2=[2062,07,28,0,0,0]; % latest arrival on the asteroid
+
 
 GA_time_min=[2032,01,30,0,0,0]; %assumption for fly-by window
 GA_time_max=[2033,01,30,0,0,0]; %assumption for fly-by window
@@ -49,8 +61,8 @@ m1=min(dv_tot);
 m2=min(min(dv_tot));
 m3=min(min(min(dv_tot)));
 
-% [x,y,z,val]=find(dv_tot==m3);
-[x,y,z] = ind2sub(size(dv_tot),dv_tot==m3);
+% [x,y,z]=find(dv_tot==m3);
+[x,y,z] = ind2sub(size(dv_tot),find(dv_tot==m3));
 DepartureTime_min_dv=mjd20002date(tspan1(x));
 FlyBy_Time_min_dv=mjd20002date(tspanGA(y));
 ArrivalTime_min_dv=mjd20002date(tspan2(z));
