@@ -30,6 +30,10 @@ end
 
 
 %% plotting
+% a
+clc
+close all
+
 hold on
 N = 100;
 amean = movmean(S_Gauss(:, 1), N);
@@ -40,7 +44,7 @@ legend('average','Cartesian','Gauss')
 
 figure
 plot(T_Gauss/T,a-S_Gauss(:,1));
-%% 
+%% e
 figure
 N = 500;
 emean = movmean(S_Gauss(:, 2), N);
