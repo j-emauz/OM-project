@@ -22,7 +22,7 @@ T_Earth=2*pi*sqrt( a_Earth^3/mu_S );
 Tsyn_ES=T_Saturn*T_Earth/(abs(T_Saturn-T_Earth));
 
 N_synodic_T=5;
-% end of departure window
+%% end of departure window
 dept2_mjd2000 = date2mjd2000(dept1)+N_synodic_T*Tsyn_ES/3600/24;
 dept2=mjd20002date(dept2_mjd2000);
 
@@ -34,10 +34,16 @@ dept2=mjd20002date(dept2_mjd2000);
 % t_parabolic=M/n_parabolic;
 % dept2_mjd2000 = date2mjd2000(dept1)
 
-% Time to go to Saturn from Earth is around 8 years:
-arrt1=[2048,07,28,0,0,0];  %First possible arrival time at the asteroid
+%% Time to go to Saturn from Earth is around 8 years:
+% arrt1=[2048,07,28,0,0,0];  %First possible arrival time at the asteroid
 GA_window_1=[2037,01,30,0,0,0]; %assumption for fly-by window
 GA_window_2=[2042,01,30,0,0,0]; %assumption for fly-by window
+
+[kepNEO_arr,~,~] = ephNEO(date2mjd2000(GA_window_2),86);
+T_NEO=2*pi*sqrt( (kepNEO_arr(1))^3/mu_S ); % Orbital period [1/s]
+Tsyn_SN=T_Saturn*T_NEO/(abs(T_Saturn-T_NEO));
+GA_window_2_mjd2000 = date2mjd2000(GA_window_2)+10*Tsyn_SN/3600/24;
+arrt1=mjd20002date(dept2_mjd2000);
 
 %conversion to Modern Julian Date 2000
 t_dept1 = date2mjd2000(dept1);
@@ -84,7 +90,7 @@ clc
 [X, Y] = meshgrid(tspan_dept, tspan_GA);
 Z = dv_grid_arc1(X, Y, p1, p2, mu_S);
 
-V=5:30;
+V=5:5:30;
 contour(X, Y, Z, V,'ShowText','on');
 colorbar
 % surface(X,Y,Z)
