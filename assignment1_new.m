@@ -12,7 +12,7 @@ AU= astroConstants(2);
 % data
 dept1=[2028,01,30,0,0,0]; %GIVEN
 arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
-rp_min=R_E*21 * 1.1;
+rp_min=R_E*21 * 1.2;
 
 % synodic period
 a_Saturn=9.5826*AU;
@@ -55,14 +55,16 @@ tspan_GA=linspace(t_GA_window_1, t_GA_window_2, 100); % fly-by window
 p1=3; %Earth
 p2=6; %Saturn
 
+
 for i=1:length(tspan_dept)
     for j=1:length(tspan_GA)       
         [dv_1(i,j),V_SC_Saturn_1,V_Saturn, r_Saturn, t1(i,j),ToF1] = dv_arc1(tspan_dept(i), tspan_GA(j), p1, p2, mu_S);        
         % dv_1 manoeuver at Earth
         for k=1:length(tspan_arrt) 
+            k
             [kepNEO_arr,~,~] = ephNEO(tspan_arrt(k),86);
-            [dv_2(i,j,k),V_SC_Saturn_2, t2(i,j,k),ToF2] = dv_arc2(tspan_GA(i), tspan_arrt(k), r_Saturn, kepNEO_arr, mu_S);
-            [rp, Delta_vp(i,j,k)] = PGA (V_Saturn, V_SC_Saturn_1, V_SC_Saturn_2, rp_min,mu_Saturn);
+            [dv_2(i,j,k),V_SC_Saturn_2, t2(i,j,k),ToF2] = dv_arc2(tspan_GA(j), tspan_arrt(k), r_Saturn, kepNEO_arr, mu_S);
+            [rp, Delta_vp(i,j,k)] = PGA (V_Saturn, V_SC_Saturn_1', V_SC_Saturn_2', rp_min,mu_Saturn);
             %[rp, Delta_vp] = PGA (V_P,V_minus,V_plus,rp_min,mu_E)
             dv_tot(i,j,k) = dv_1(i,j) + dv_2(i,j,k) + Delta_vp(i,j,k);
         end
