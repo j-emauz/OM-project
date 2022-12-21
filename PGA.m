@@ -1,4 +1,4 @@
-function [rp, Delta_vp] = PGA (V_P,V_minus,V_plus,rp_min,mu)
+function [rp, Delta_vp,vp_minus,vp_plus,v_inf_minus,v_inf_plus] = PGA (V_P,V_minus,V_plus,rp_min,mu)
 
 options = optimset('TolFun',1e-14,'Display','off');
 

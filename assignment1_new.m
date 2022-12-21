@@ -8,7 +8,7 @@ mu_Saturn = astroConstants(16);
 mu_E= astroConstants(13);
 R_E= astroConstants(23);
 AU= astroConstants(2);
-
+R_Saturn=astroConstants(26);
 % data
 dept1=[2028,01,30,0,0,0]; %GIVEN
 arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
@@ -71,7 +71,7 @@ for i=1:length(tspan_dept)
         for k=1:length(tspan_arrt)             
             [kepNEO_arr,~,~] = ephNEO(tspan_arrt(k),86);
             [dv_2(i,j,k),V_SC_Saturn_2, t2(i,j,k),ToF2] = dv_arc2(tspan_GA(j), tspan_arrt(k), r_Saturn, kepNEO_arr, mu_S);
-            [rp, Delta_vp(i,j,k)] = PGA (V_Saturn, V_SC_Saturn_1',V_SC_Saturn_2', rp_min,mu_Saturn);
+            [rp(i,j,k), Delta_vp(i,j,k),vp_minus(i,j,k),vp_plus(i,j,k),v_inf_minus(i,j,k,:),v_inf_plus(i,j,k,:)] = PGA (V_Saturn, V_SC_Saturn_1',V_SC_Saturn_2', rp_min,mu_Saturn);
             V_per_plus(i,j,k,:) = V_SC_Saturn_2;
             %[rp, Delta_vp] = PGA (V_P,V_minus,V_plus,rp_min,mu_E)
             dv_tot(i,j,k) = dv_1(i,j) + dv_2(i,j,k) + Delta_vp(i,j,k);
@@ -109,38 +109,50 @@ colorbar
 earth_sphere
 hold on
 grid on
-T=3600*2;
-%y0 =
+
+T=3600*24*2;
+
+v_inf_min=squeeze(v_inf_minus(x,y,z,:));
+v_inf_pl=squeeze(v_inf_plus(x,y,z));
+ecc_minus= 1+(rp(x,y,z)*(norm(v_inf_min)^2)/mu_Saturn);
+ecc_plus=1+(rp(x,y,z)*(norm(v_inf_pl)^2)/mu_Saturn);
+a_minus=rp(x,y,z)/(1-ecc_minus);
+a_plus=rp(x,y,z)/(1-ecc_plus);
+
+y0 =[rp(x,y,z)*[1;0;0]; vp_minus(x,y,z)*[0;1;0]];
+
 tspan = linspace( 0, -T,1000);
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-[t, Y_planet_before ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options);
-plot3( Y_planet_before(:,1), Y_planet_before(:,2), Y_planet_before(:,3), '-','LineWidth',2);
+[t, Y_FlyBy_before ] = ode113( @(t,y) ode_2bp(t,y,mu_Saturn), tspan, y0, options);
+plot3( Y_FlyBy_before(:,1), Y_FlyBy_before(:,2), Y_FlyBy_before(:,3), '-b','LineWidth',2);
 hold on
 
-T=3600*2;
-y0=[rp*[1;0;0]; vp_plus*[0;1;0]];
+y0=[rp(x,y,z)*[1;0;0];vp_plus(x,y,z)*[0;1;0]];
 tspan = linspace( 0, T,1000);
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-[t, Y_planet_before ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options);
-plot3( Y_planet_before(:,1), Y_planet_before(:,2), Y_planet_before(:,3), '-','LineWidth',2);
-xlabel('x [R_E]');
-ylabel('y [R_E]');
-zlabel('z [R_E]');
+[t, Y_FlyBy_after ] = ode113( @(t,y) ode_2bp(t,y,mu_Saturn), tspan, y0, options);
+plot3( Y_FlyBy_after(:,1), Y_FlyBy_after(:,2), Y_FlyBy_after(:,3), '-r','LineWidth',2);
+xlabel('x [ R_{Saturn} ]');
+ylabel('y [ R_{Saturn} ]');
+zlabel('z [ R_{Saturn} ]');
 hold on
 
-x= -4 *R_E  : rp-a_minus;
-y= -tan(acos(-1/ecc_minus(rp)))*(x+a_minus-rp);
-plot(x,y,'b-',LineWidth=2);
+%Entry Asymptote
+x_asymp1= -18 *R_Saturn  : rp(x,y,z)-a_minus;
+y_asymp1= -tan(acos(-1/ecc_minus))*(x_asymp1+a_minus-rp(x,y,z));
+plot(x_asymp1,y_asymp1,'b-',LineWidth=1);
 
-hold on
-x=-4*R_E:rp-a_plus;
-y= tan(acos(-1/ecc_plus(rp)))*(x+a_plus-rp);
-plot(x,y,'r-',LineWidth=2);
+%Exit Asymptote
+x_asymp2=-18*R_Saturn:rp(x,y,z)-a_plus;
+y_asymp2= tan(acos(-1/ecc_plus))*(x_asymp2+a_plus-rp(x,y,z));
+plot(x_asymp2,y_asymp2,'r-',LineWidth=1);
 
-x=-6*R_E:6*R_E;
-y=0*x;
-plot(x,y,'--k',LineWidth=2);
-axis([-5*R_E 5*R_E -10*R_E 10*R_E]);
+x_3=-20*R_Saturn:20*R_Saturn;
+y_3=0*x_3;
+plot(x_3,y_3,'--k',LineWidth=1);
+%  axis([-20*R_Saturn 20*R_Saturn -20*R_Saturn 20*R_Saturn]);
+scatter3(0,0,0,80,'red','filled');
+legend('','Hyperbola entry leg', 'Hyperbola exit leg','Entry Asymptote', 'Exit Asymptote','','Saturn');
 %% heliocentric leg
 
 figure()
@@ -149,8 +161,8 @@ hold on
 %Plotting of 1st transfer arc
 [kep_1,~] = uplanet(tspan_GA(y),p2);
 [r0,v0] = par2car(kep_1(1),kep_1(2),kep_1(3),kep_1(4),kep_1(5),kep_1(6),mu_S);
-%V_minus = V_per_min(x,y,:);
-V_minus = V_per_min;
+V_minus = V_per_min(x,y,:);
+% V_minus = V_per_min;
 y0=[r0;V_minus];
 % T=3600*24*365*5;
 % % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
