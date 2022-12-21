@@ -67,10 +67,12 @@ for i=1:length(tspan_dept)
     for j=1:length(tspan_GA)       
         [dv_1(i,j),V_SC_Saturn_1,V_Saturn, r_Saturn, t1(i,j),ToF1] = dv_arc1(tspan_dept(i), tspan_GA(j), p1, p2, mu_S);        
         % dv_1 manoeuver at Earth
+        V_per_min(i,j,:)=V_SC_Saturn_1;
         for k=1:length(tspan_arrt)             
             [kepNEO_arr,~,~] = ephNEO(tspan_arrt(k),86);
             [dv_2(i,j,k),V_SC_Saturn_2, t2(i,j,k),ToF2] = dv_arc2(tspan_GA(j), tspan_arrt(k), r_Saturn, kepNEO_arr, mu_S);
-            [rp, Delta_vp(i,j,k)] = PGA (V_Saturn, V_SC_Saturn_1', V_SC_Saturn_2', rp_min,mu_Saturn);
+            [rp, Delta_vp(i,j,k)] = PGA (V_Saturn, V_SC_Saturn_1',V_SC_Saturn_2', rp_min,mu_Saturn);
+            V_per_plus(i,j,k,:) = V_SC_Saturn_2;
             %[rp, Delta_vp] = PGA (V_P,V_minus,V_plus,rp_min,mu_E)
             dv_tot(i,j,k) = dv_1(i,j) + dv_2(i,j,k) + Delta_vp(i,j,k);
         end
@@ -97,15 +99,18 @@ colorbar
 
 %% Porkchop plot asteroid
 
-[X, Y] = meshgrid(tspan1, tspan2);
-Z = dv_calcgrid(X, Y, p1, p2, mu);
+[X, Y] = meshgrid(tspan_GA, tspan_arrt);
+Z = dv_calcgrid(X, Y, p1, p2, mu_S);
 
+V=5:30;
+contour(X, Y, Z, V,'ShowText','on');
+colorbar
 %% Plot the planetocentric hyperbolic arcs:
 earth_sphere
 hold on
 grid on
 T=3600*2;
-y0=[rp*[1;0;0]; vp_minus*[0;1;0]];
+%y0 =
 tspan = linspace( 0, -T,1000);
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [t, Y_planet_before ] = ode113( @(t,y) ode_2bp(t,y,mu_E), tspan, y0, options);
@@ -141,8 +146,10 @@ axis([-5*R_E 5*R_E -10*R_E 10*R_E]);
 figure()
 earth_sphere('AU')
 hold on
-r0=r_E;
-y0=[r0;V_minus];
+[kep_1,~] = uplanet(tspan_dept(x),p2);
+[r0,~] = par2car(kep_1(1),kep_1(2),kep_1(3),kep_1(4),kep_1(5),kep_1(6),mu_S);
+V_per_min = squeeze(V_per_min(x,y,:));
+y0=[r0;V_per_min];
 T=3600*24*365/2;
 % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, -T,1000);
@@ -153,8 +160,11 @@ plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, '
 hold on
 grid on
 scatter3(0, 0 ,0 ,100, 'yellow', 'filled');
-scatter3(r_E(1)/AU,r_E(2)/AU,r_E(3)/AU,20,'green','filled');
-y0=[r0;V_plus];
+scatter3(r0(1)/AU,r0(2)/AU,r0(3)/AU,20,'green','filled');
+
+V_per_plus = squeeze(V_per_plus(x,y,z,:));
+
+y0=[r0;V_per_plus];
 % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, T,1000);
      % Set options for the ODE solver
