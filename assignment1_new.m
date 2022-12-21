@@ -21,9 +21,22 @@ a_Earth=AU;
 T_Earth=2*pi*sqrt( a_Earth^3/mu_S );
 Tsyn_ES=T_Saturn*T_Earth/(abs(T_Saturn-T_Earth));
 
-N_synodic_T=5;
+% Time to go to Saturn from Earth is around 8 years:
+arrt1=[2048,07,28,0,0,0];  %First possible arrival time at the asteroid
+GA_window_1=[2037,01,30,0,0,0]; %assumption for fly-by window
+GA_window_2=[2042,01,30,0,0,0]; %assumption for fly-by window
+
+[kepNEO_arr,~,~] = ephNEO(date2mjd2000(GA_window_2),86);
+T_NEO=2*pi*sqrt( (kepNEO_arr(1))^3/mu_S ); % Orbital period [1/s]
+Tsyn_SN=T_Saturn*T_NEO/(abs(T_Saturn-T_NEO));
+% GA_window_2_mjd2000 = date2mjd2000(GA_window_2)+10*Tsyn_SN/3600/24;
+%arrt1=mjd20002date(dept2_mjd2000); %%THIS WAS GIVING US AN ERROR
+
+N_synodic_T=1;
+
 % end of departure window
-dept2_mjd2000 = date2mjd2000(dept1)+N_synodic_T*Tsyn_ES/3600/24;
+
+dept2_mjd2000 = date2mjd2000(dept1)+N_synodic_T*Tsyn_SN/3600/24;
 dept2=mjd20002date(dept2_mjd2000);
 
 % theta_parabolic=2/3*pi;
@@ -34,16 +47,6 @@ dept2=mjd20002date(dept2_mjd2000);
 % t_parabolic=M/n_parabolic;
 % dept2_mjd2000 = date2mjd2000(dept1)
 
-% Time to go to Saturn from Earth is around 8 years:
-arrt1=[2048,07,28,0,0,0];  %First possible arrival time at the asteroid
-GA_window_1=[2037,01,30,0,0,0]; %assumption for fly-by window
-GA_window_2=[2042,01,30,0,0,0]; %assumption for fly-by window
-
-[kepNEO_arr,~,~] = ephNEO(date2mjd2000(GA_window_2),86);
-T_NEO=2*pi*sqrt( (kepNEO_arr(1))^3/mu_S ); % Orbital period [1/s]
-Tsyn_SN=T_Saturn*T_NEO/(abs(T_Saturn-T_NEO));
-GA_window_2_mjd2000 = date2mjd2000(GA_window_2)+10*Tsyn_SN/3600/24;
-%arrt1=mjd20002date(dept2_mjd2000); %%THIS WAS GIVING US AN ERROR
 
 %conversion to Modern Julian Date 2000
 t_dept1 = date2mjd2000(dept1);
@@ -153,7 +156,7 @@ plot(x_3,y_3,'--k',LineWidth=1);
 %  axis([-20*R_Saturn 20*R_Saturn -20*R_Saturn 20*R_Saturn]);
 scatter3(0,0,0,80,'red','filled');
 legend('','Hyperbola entry leg', 'Hyperbola exit leg','Entry Asymptote', 'Exit Asymptote','','Saturn');
-%% heliocentric leg
+%% heliocentric plot
 
 figure()
 earth_sphere('AU')
@@ -161,7 +164,7 @@ hold on
 %Plotting of 1st transfer arc
 [kep_1,~] = uplanet(tspan_GA(y),p2);
 [r0,v0] = par2car(kep_1(1),kep_1(2),kep_1(3),kep_1(4),kep_1(5),kep_1(6),mu_S);
-V_minus = V_per_min(x,y,:);
+V_minus = squeeze(V_per_min(x,y,:));
 % V_minus = V_per_min;
 y0=[r0;V_minus];
 % T=3600*24*365*5;
