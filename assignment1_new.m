@@ -22,22 +22,39 @@ T_Earth=2*pi*sqrt( a_Earth^3/mu_S );
 Tsyn_ES=T_Saturn*T_Earth/(abs(T_Saturn-T_Earth));
 
 % Time to go to Saturn from Earth is around 8 years:
-arrt1=[2048,07,28,0,0,0];  %First possible arrival time at the asteroid
-GA_window_1=[2037,01,30,0,0,0]; %assumption for fly-by window
-GA_window_2=[2042,01,30,0,0,0]; %assumption for fly-by window
+%arrt1=[2048,07,28,0,0,0];  %First possible arrival time at the asteroid
+%GA_window_1=[2037,01,30,0,0,0]; %assumption for fly-by window
+%GA_window_2=[2042,01,30,0,0,0]; %assumption for fly-by window
 
-[kepNEO_arr,~,~] = ephNEO(date2mjd2000(GA_window_2),86);
+
+
+
+%[kepNEO_arr,~,~] = ephNEO(date2mjd2000(GA_window_2),86);
+[kepNEO_arr,~,~] = ephNEO(0,86);
 T_NEO=2*pi*sqrt( (kepNEO_arr(1))^3/mu_S ); % Orbital period [1/s]
 Tsyn_SN=T_Saturn*T_NEO/(abs(T_Saturn-T_NEO));
 % GA_window_2_mjd2000 = date2mjd2000(GA_window_2)+10*Tsyn_SN/3600/24;
 %arrt1=mjd20002date(dept2_mjd2000); %%THIS WAS GIVING US AN ERROR
 
-N_synodic_T=1;
+N_synodic_T=5;
 
 % end of departure window
 
-dept2_mjd2000 = date2mjd2000(dept1)+N_synodic_T*Tsyn_SN/3600/24;
+dept2_mjd2000 = date2mjd2000(dept1)+N_synodic_T*Tsyn_ES/3600/24;
 dept2=mjd20002date(dept2_mjd2000);
+
+ToF1_min = 7; %years
+ToF1_max = 10; %years
+
+GA_window_1=dept1 + [ToF1_min, 0, 0 ,0 ,0, 0]; %assumption for fly-by window
+GA_window_2=dept2 + [ToF1_max, 0, 0 ,0 ,0, 0]; %assumption for fly-by window
+
+ToF2_min = (1.2*Tsyn_SN)/3600/24;
+ToF2_max = (2.3*Tsyn_SN)/3600/24;
+
+arrt1 = mjd20002date(date2mjd2000(GA_window_1)+ToF2_min); %First possible arrival time at the asteroid
+arrt2 = mjd20002date(date2mjd2000(GA_window_2)+ToF2_max);
+%arrt2 = GA_window_2 + [10, 0, 0 ,0 ,0, 0];
 
 % theta_parabolic=2/3*pi;
 % p_parabolic=100;
