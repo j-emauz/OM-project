@@ -9,7 +9,7 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R)
 
      initial_date=[2022,03,21,12,0,0];
      initial_time=date2mjd2000(initial_date);
-     t_days=t/3600/24/365.25; %days since initial time
+     t_days=t/3600/24; %days since initial time
      [kep_E,~]=uplanet(initial_time+t_days,3);
      [r_E_S,~] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
      [rr, vv] = par2car(s(1), s(2), s(3), s(4), s(5), s(6), mu_S);
@@ -45,7 +45,7 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R)
     h = sqrt(p*mu);
     
     acc_pert_vec_J2 = -3/2*J2*mu*R^2/r^4.*[1-3*(sin(s(3)))^2*sin((s(6)+s(5)))^2; (sin(s(3)))^2*sin(2*(s(6)+s(5))); sin(2*s(3))*sin((s(6)+s(5)))];
-    acc_pert_SRP= P_sun*(AU^2)/(norm(r_sc_Sun)^2)*Cr*AMR;
+    acc_pert_SRP= P_sun*(AU^2)/(norm(r_sc_Sun)^2)*Cr*AMR*10^-3;
     acc_pert_vec_SRP=-acc_pert_SRP*(r_sc_Sun./norm(r_sc_Sun));
     
     acc_pert_vec_SRP = R_rsw2eci'*acc_pert_vec_SRP;

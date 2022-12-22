@@ -126,19 +126,19 @@ P_sun=4.5*10^-6; %[N/m^2]
 Cr=1; 
 
 % Earth orbit around the Sun:
-initial_date=[2022,03,21,12,0,0]; %Spring Equinox
-initial_time=date2mjd2000(initial_date);
-[kep_E,~]=uplanet(initial_time,3);
-[r0,v0] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
-y0 = [r0;v0];
+%initial_date=[2022,03,21,12,0,0]; %Spring Equinox
+%initial_time=date2mjd2000(initial_date);
+%[kep_E,~]=uplanet(initial_time,3);
+%[r0,v0] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
+%y0 = [r0;v0];
 % T=2*pi*sqrt(kep_E(1)^3/mu_S);
 % tspan = linspace( 0, T,1000);
 
 % Set options for the ODE solver
-options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-[ t, Y_earth ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+%options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+%[ t, Y_earth ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
 
-r_E_S=Y_earth(:,1:3);
+%r_E_S=Y_earth(:,1:3);
 %r_sc_E=Y(:,1:3);
 %r_sc_Sun_ecliptic=r_E_S;%r_E_S + r_sc_E
 % r_sc_Sun=zeros(length(tspan),3);
@@ -160,7 +160,7 @@ r_E_S=Y_earth(:,1:3);
 
 
 %Orbit propagation with Cartesian Coordinates:
-tspan_pert = linspace( 0, 100*T, 1000 );
+tspan_pert = linspace( 0, 100*T, 10000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
 [ T_J2, S_J2 ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E), tspan_pert, y0, options );
 
@@ -171,7 +171,7 @@ for k=1:size(S_J2,1)
 end
 
 %Orbit propagation in Keplerian Elements using Gauss' planetary equations:
-tspan = linspace( 0, 100*T, 1000 );
+tspan = linspace( 0, 100*T, 10000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14);
 [ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E), mu_E), tspan_pert, kep0, options );
 

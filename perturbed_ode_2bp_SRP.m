@@ -28,13 +28,13 @@ rnorm = norm(r);
 
 Cr = 1;
 AU = astroConstants(2);
-AMR = 10;
+AMR = 10;%m^2/kg
 mu_S = astroConstants(4);
-P_sun = 4.5*10^-6;
+P_sun = 4.57*10^-6; %in N/m^2
 
  initial_date=[2022,03,21,12,0,0];
  initial_time=date2mjd2000(initial_date);
- t_days=t/3600/24/365.25; %days since initial time
+ t_days=t/3600/24; %days since initial time
  [kep_E,~]=uplanet(initial_time+t_days,3);
  [r_E_S,~] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
 
@@ -44,7 +44,7 @@ P_sun = 4.5*10^-6;
         0  cos(tilt)   sin(tilt);
         0  -sin(tilt)  cos(tilt)];
   r_sc_Sun= R_eci2sce'*(r_E_S); 
-  acc_pert_SRP= P_sun*(AU^2)/(norm(r_sc_Sun)^2)*Cr*AMR;
+  acc_pert_SRP= P_sun*(AU^2)/(norm(r_sc_Sun)^2)*Cr*AMR*1e-3;
   acc_pert_vec_SRP=-acc_pert_SRP*(r_sc_Sun./norm(r_sc_Sun));
 
 a=3/2*J2*mu*R^2/rnorm^4*[r(1)/rnorm*(5*r(3)^2/rnorm^2-1); r(2)/rnorm*(5*r(3)^2/rnorm^2-1); r(3)/rnorm*(5*r(3)^2/rnorm^2-3)   ];
