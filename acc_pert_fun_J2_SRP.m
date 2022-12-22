@@ -12,7 +12,7 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R)
      t_days=t/3600/24; %days since initial time
      [kep_E,~]=uplanet(initial_time+t_days,3);
      [r_S_E,~] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
-     [rr, vv] = par2car(s(1), s(2), s(3), s(4), s(5), s(6), mu_S);
+    % [rr, vv] = par2car(s(1), s(2), s(3), s(4), s(5), s(6), mu_S);
 %     
      %r_dir = rr./norm(rr);
      %w_dir = cross(rr,vv)./norm(cross(rr,vv));
