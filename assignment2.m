@@ -136,7 +136,7 @@ Cr=1;
 
 % Earth orbit around the Sun:
 %initial_date=[2022,03,21,12,0,0]; %Spring Equinox
-%initial_time=date2mjd2000(initial_date);
+initial_time=date2mjd2000(initial_date);
 %[kep_E,~]=uplanet(initial_time,3);
 %[r0,v0] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
 %y0 = [r0;v0];
@@ -206,7 +206,7 @@ end
 
 earth_sphere
 hold on
-plot3( r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3), 'r-','LineWidth',1);
+waterfall( r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3));
 hold off
 
 % plotting perturbed orbit (2)
@@ -316,3 +316,19 @@ figure
 grid on
 semilogy(T_Gauss/T,th_error);
 title('true anomaly error');
+
+%% point 7 - Comparison with real data
+
+sc_ephemeris=load("056B_3y_matrix.mat");
+
+e=sc_ephemeris.B3y.EC;
+a=sc_ephemeris.B3y.A;
+i=sc_ephemeris.B3y.IN.*pi/180;
+OM=sc_ephemeris.B3y.OM.*pi/180;
+om=sc_ephemeris.B3y.W.*pi/180;
+theta=sc_ephemeris.B3y.TA.*pi/180;
+date=sc_ephemeris.B3y.CalendarDateTDB; %date
+date0=date(1);
+date_0=[2020,12,22,0,0,0];
+t0=date2mjd2000(date_0)
+
