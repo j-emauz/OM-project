@@ -1,4 +1,4 @@
-function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,Cr,AU,R,r_sc_Sun)
+function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,Cr,AU,R,r_sc_Sun,v_SC)
  % Evaluate the perturbing accelerations in a given
     % RSW
 
@@ -14,7 +14,9 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,Cr,AU,R,r_sc_Sun)
     acc_pert_SRP= P_sun*(AU^2)/(vecnorm(r_sc_Sun,2,2)^2)*Cr*AMR;
     acc_pert_vec_SRP=-acc_pert_vec_SRP*(r_sc_Sun./vecnorm(r_sc_Sun,2,2));
     
+    acc_pert_vec_SRP
     acc_pert_vec=acc_pert_vec_J2+acc_pert_vec_SRP;
+
     % A_rot=h/(p*v).*[s(2)*sin(s(6)),  - (1+s(2)*cos(s(6)));
     %                    1+s(2)*cos(s(6)),   s(2)*sin(s(6))];
     % a_tn = A_rot\[a_rsw(1); a_rsw(2)];
