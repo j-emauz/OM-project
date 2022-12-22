@@ -27,7 +27,6 @@ rnorm = norm(r);
 % Set the derivatives of the state
 
 a=3/2*J2*mu*R^2/rnorm^4*[r(1)/rnorm*(5*r(3)^2/rnorm^2-1); r(2)/rnorm*(5*r(3)^2/rnorm^2-1); r(3)/rnorm*(5*r(3)^2/rnorm^2-3)   ];
-
 dy = [ v
 (-mu/rnorm^3)*r + a];
 end
