@@ -16,8 +16,8 @@ e=0.4424;
 i=deg2rad(6.9341); %[rad]
 
 %Assumption:
-Om=90; %[deg]
-om=70; %[deg]
+Om=35; %[deg]
+om=25; %[deg]
 theta0=0; %[deg], Starting at pericentre
 kep0 = [a, e, i, Om *pi/180, om *pi/180, theta0 *pi/180];
 
@@ -49,7 +49,10 @@ hold on;
 grid on;
 plot3( Y(:,1), Y(:,2), Y(:,3), 'r-','LineWidth',2);
 title('Starting orbit');
-legend('Earth Sphere', 'Starting orbit');
+legend('', 'Starting orbit');
+
+
+
 
 %% Ground Track of unperturbed 2BP:
 omega_E=15.04 *pi/180/3600; %[rad/s]
@@ -74,6 +77,9 @@ n_orbits=n_days*24*3600/T;
 hold on; 
 title('Ground Track unperturbed 2BP - 10 days');
 hold off;
+
+
+
 %% Repeated Ground Track:
 % k = revolutions of the satellite;
 % m = rotations of the planet;
@@ -118,6 +124,9 @@ hold off;
 % hold off;
 
 
+
+
+
 %% Perturbed 2BP:
 
 % Data:
@@ -159,21 +168,52 @@ Cr=1;
 %end 
 
 
-%Orbit propagation with Cartesian Coordinates:
+% Orbit propagation with Cartesian Coordinates:
 tspan_pert = linspace( 0, 100*T, 10000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
-[ T_J2, S_J2 ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E), tspan_pert, y0, options );
+[ T_J2, S_perturbed ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E), tspan_pert, y0, options );
 
-for k=1:size(S_J2,1)
-   [a_p(k),e_p(k),i_p(k),OM_p(k),om_p(k),th_p(k),~]=car2par(S_J2(k,1:3)', S_J2(k,4:6)',mu_E);
+% plotting perturbed orbit (1)
+earth_sphere
+hold on
+plot3( S_perturbed(:,1), S_perturbed(:,2), S_perturbed(:,3), 'r-','LineWidth',1);
+hold off
+
+% plotting perturbed orbit (2)
+% view([270 45])
+comet3(S_perturbed(:,1), S_perturbed(:,2), S_perturbed(:,3))
+title('Perturbed orbit using Cartesian coordinates');
+hold off
+
+% converting Cartesian coordinates into keplerian parameters for comparison
+% in the following plots
+for k=1:size(S_perturbed,1)
+   [a_p(k),e_p(k),i_p(k),OM_p(k),om_p(k),th_p(k),~]=car2par(S_perturbed(k,1:3)', S_perturbed(k,4:6)',mu_E);
 %[a,e,i,OM,om,th, ee]=car2par(rr,vv,mu)
 %@(t_tt, y_tt) ode_2bp(t_tt, y_tt, mu), tspan, y0_t, options);
 end
 
-%Orbit propagation in Keplerian Elements using Gauss' planetary equations:
+
+
+%% Orbit propagation in Keplerian Elements using Gauss' planetary equations:
 tspan = linspace( 0, 100*T, 10000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14);
 [ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E), mu_E), tspan_pert, kep0, options );
+
+for j=1:size(S_Gauss,1)
+    [r_Gauss(j,:), ~] = par2car(S_Gauss(j,1), S_Gauss(j,2), S_Gauss(j,3), S_Gauss(j,4), S_Gauss(j,5), S_Gauss(j,6), mu_E);
+end
+
+earth_sphere
+hold on
+plot3( r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3), 'r-','LineWidth',1);
+hold off
+
+% plotting perturbed orbit (2)
+% view([270 45])
+comet3(S_Gauss(:,1), S_Gauss(:,2), S_Gauss(:,3))
+title('Perturbed orbit using Cartesian coordinates');
+hold off
 
 % Semi-Major Axis, a
 N = 100;
@@ -182,19 +222,21 @@ hold on;
 plot(T_Gauss/T, amean);
 plot(T_J2/T,a_p);
 plot(T_Gauss/T,S_Gauss(:,1));
-legend('average','Cartesian','Gauss')
-
+legend('average','Cartesian','Gauss');
+title('semi-major axis');
 a_error = (abs(a_p-S_Gauss(:,1)'))/kep0(1);
 
 figure
 grid on
 semilogy(T_Gauss/T,a_error);
+title('Semi-major axis error');
 
 % Eccentricity, e
 figure;
 N = 500;
 emean = movmean(S_Gauss(:, 2), N);
 plot(T_Gauss/T,S_Gauss(:,2));
+title('eccentricity');
 hold on
 plot(T_J2/T,e_p);
 plot(T_Gauss/T, emean);
@@ -204,6 +246,7 @@ e_error = (abs(S_Gauss(:,2)'-e_p));
 figure
 grid on
 semilogy(T_Gauss/T,e_error);
+title('eccentricity error');
 
 % Inclination, i
 figure;
@@ -213,12 +256,14 @@ plot(T_Gauss/T,S_Gauss(:,3));
 hold on
 plot(T_J2/T,i_p);
 plot(T_Gauss/T, imean);
+title('inclination');
 legend('Gauss','Cartesian','average')
 
 i_error = (abs(S_Gauss(:,3)'-i_p))/(2*pi);
 figure
 grid on
 semilogy(T_Gauss/T,i_error);
+title('inclination error');
 
 % Right Ascension of the Ascending Node, OM
 figure;
@@ -229,11 +274,13 @@ hold on
 plot(T_J2/T,OM_p);
 plot(T_Gauss/T, OMmean);
 legend('Gauss','Cartesian','average')
+title('Right Ascension of the Ascending Node');
 
 OM_error = (abs(S_Gauss(:,4)'-OM_p))/(2*pi);
 figure
 grid on
 semilogy(T_Gauss/T,OM_error);
+title('Right Ascension of the Ascending Node error');
 
 % Argument of pericenter, om
 figure;
@@ -244,11 +291,13 @@ hold on
 plot(T_J2/T,om_p);
 plot(T_Gauss/T, ommean);
 legend('Gauss','Cartesian','average')
+title('argument of pericenter');
 
 om_error = (abs(S_Gauss(:,5)'-om_p))/(2*pi);
 figure
 grid on
 semilogy(T_Gauss/T,om_error);
+title('argument of pericenter error');
 
 % True Anomaly, theta
 figure;
@@ -260,8 +309,10 @@ hold on
 plot(T_J2/T,th_p);
 plot(T_Gauss/T, thmean);
 legend('Gauss','Cartesian','average')
+title('true anomaly');
 
 th_error = (abs(S_Gauss(:,6)'-th_p))/(2*pi);
 figure
 grid on
 semilogy(T_Gauss/T,th_error);
+title('true anomaly error');
