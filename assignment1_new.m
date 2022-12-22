@@ -1,14 +1,20 @@
-clear
 clc
+clear
 close all
 
 % constants
+G=astroConstants(1);
 mu_S = astroConstants(4);
 mu_Saturn = astroConstants(16);
 mu_E= astroConstants(13);
 R_E= astroConstants(23);
 AU= astroConstants(2);
 R_Saturn=astroConstants(26);
+% Computation of masses, using mu = mass * G
+m_Saturn=mu_Saturn/G;
+m_Sun=mu_S/G;
+m_E=mu_E/G;
+
 % data
 dept1=[2028,01,30,0,0,0]; %GIVEN
 arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
@@ -106,30 +112,7 @@ m3=min(min(min(dv_tot)));
 % [x,y,z]=find(dv_tot==m3);
 [x,y,z] = ind2sub(size(dv_tot),find(dv_tot==m3));
 
-%% Porkchop plot Saturn
-clc
-
-[X, Y] = meshgrid(tspan_dept, tspan_GA);
-Z = dv_grid_arc1(X, Y, p1, p2, mu_S);
-
-V=5:30;
-contour(X, Y, Z, V,'ShowText','on');
-colorbar
-% surface(X,Y,Z)
-
-%% Porkchop plot asteroid
-
-[X, Y] = meshgrid(tspan_GA, tspan_arrt);
-Z = dv_calcgrid(X, Y, p1, p2, mu_S);
-
-V=5:30;
-contour(X, Y, Z, V,'ShowText','on');
-colorbar
-%% Plot the planetocentric hyperbolic arcs:
-earth_sphere
-hold on
-grid on
-
+%% Optimal solution - Fly-By time
 T=3600*24*2;
 
 v_inf_min=squeeze(v_inf_minus(x,y,z,:));
@@ -138,6 +121,56 @@ ecc_minus= 1+(rp(x,y,z)*(norm(v_inf_min)^2)/mu_Saturn);
 ecc_plus=1+(rp(x,y,z)*(norm(v_inf_pl)^2)/mu_Saturn);
 a_minus=rp(x,y,z)/(1-ecc_minus);
 a_plus=rp(x,y,z)/(1-ecc_plus);
+
+% radius of SOI:
+r_SOI= a_Saturn*(m_Saturn/m_Sun)^(2/5);
+theta_minus= acos((1/ecc_minus)*((a_minus*(1-ecc_minus^2)/r_SOI)-1));
+E_minus=2*atanh(sqrt((ecc_minus-1)/(1+ecc_minus)*tan(theta_minus/2)));
+theta_plus= acos((1/ecc_plus)*((a_plus*(1-ecc_plus^2)/r_SOI)-1));
+E_plus=2*atanh(sqrt((ecc_plus-1)/(1+ecc_plus)*tan(theta_plus/2)));
+
+% Hyperbolic time law:
+n_minus=sqrt(mu_Saturn/abs(a_minus)^3);
+n_plus=sqrt(mu_Saturn/abs(a_plus)^3);
+Delta_t_minus=(ecc_minus*sinh(E_minus)-E_minus)/n_minus;
+Delta_t_plus=(ecc_plus*sinh(E_plus)-E_plus)/n_plus;
+Delta_t_FlyBy=Delta_t_minus+ Delta_t_plus;
+Delta_t_FlyBy_days=Delta_t_FlyBy/3600/24;
+
+%% Porkchop plot Saturn
+clc
+
+[X, Y] = meshgrid(tspan_dept, tspan_GA);
+Z = dv_grid_arc1(X, Y, p1, p2, mu_S);
+
+V=5:30;
+contour(X./365.25 + 2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
+colorbar
+xlabel('Departure time [years]');
+ylabel('Arrival time [years]');
+title('Transfer to Saturn Porkchop plot');
+hold on;
+scatter(tspan_dept(x)/365.25+2000,tspan_GA(y)/365.25+2000,20,'red','filled');
+% surface(X,Y,Z)
+
+%% Porkchop plot asteroid
+
+[X, Y] = meshgrid(tspan_GA, tspan_arrt);
+Z = dv_calcgrid(X, Y, p1, p2, mu_S);
+
+V=5:30;
+contour(X./365.25 +2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
+colorbar
+xlabel('Departure time [years]');
+ylabel('Arrival time [years]');
+title('Transfer to Asteroid Porkchop plot');
+hold on;
+scatter(tspan_GA(y)/365.25+2000,tspan_arrt(z)/365.25+2000,20,'red','filled');
+%% Plot the planetocentric hyperbolic arcs:
+earth_sphere
+hold on
+grid on
+
 
 y0 =[rp(x,y,z)*[1;0;0]; vp_minus(x,y,z)*[0;1;0]];
 
