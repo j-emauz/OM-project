@@ -330,5 +330,10 @@ theta=sc_ephemeris.B3y.TA.*pi/180;
 date=sc_ephemeris.B3y.CalendarDateTDB; %date
 date0=date(1);
 date_0=[2020,12,22,0,0,0];
-t0=date2mjd2000(date_0)
+t0=date2mjd2000(date_0);
+date_final=[2023,1,19,0,0,0];
+t_final=date2mjd2000(date_final);
+
+t_span_sc=t0:1:t_final;
+
 
