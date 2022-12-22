@@ -11,7 +11,7 @@ J2=astroConstants(9);
 
 a=29032; %[km] 
 e=0.4424; 
-i=6.9341; %[deg]
+i=deg2rad(6.9341); %[rad]
 
 %Assumption:
 Om=90; %[deg]
@@ -100,14 +100,15 @@ T_repeating_3=2*pi*sqrt(a_repeating_3^3/mu_E);
 hold on; 
 title('Repeated Ground Track unperturbed 2BP - 10 days');
 hold off;
+
 %Using the ratio k/m assigned: 
-ratio=7/4;
 k=7;
 m=4;
+ratio=k/m;
 n_orbits=k;
 n_SC=omega_E*ratio; %[rad/s]
 a_repeating=(mu_E/n_SC^2)^(1/3);
-T_repeating=2*pi/omega_E*ratio;
+T_repeating=2*pi/omega_E*1/ratio;
 
 [lon4,lat4]=groundTrack(T_repeating,n_orbits,theta_G0, y0,t0);
 hold on; 
