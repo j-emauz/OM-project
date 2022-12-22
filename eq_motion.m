@@ -1,4 +1,4 @@
-function ds = eq_motion( t, s, acc_pert_fun_J2_SRP, mu)
+function ds = eq_motion( t, s, acc_pert_fun_J2_SRP, mu, mu_S)
     % Evaluate the perturbing accelerations
     
     acc_pert = acc_pert_fun_J2_SRP( t, s );

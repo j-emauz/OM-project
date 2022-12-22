@@ -139,24 +139,24 @@ options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [ t, Y_earth ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
 
 r_E_S=Y_earth(:,1:3);
-r_sc_E=Y(:,1:3);
-r_sc_Sun_ecliptic=r_E_S + r_sc_E;
+%r_sc_E=Y(:,1:3);
+%r_sc_Sun_ecliptic=r_E_S;%r_E_S + r_sc_E
 % r_sc_Sun=zeros(length(tspan),3);
     
-    tilt = deg2rad(23.45);
-    R1_eps = [1   0   0; % Rotation Matrix: ECI -> Sun-Centered-Ecliptic
-            0  cos(tilt)   sin(tilt);
-            0  -sin(tilt)  cos(tilt)];
+%tilt = deg2rad(23.45);
+%R1_eps = [1   0   0;                %ECI -> Sun-Centered-Ecliptic
+         % 0  cos(tilt)   sin(tilt);
+          %0  -sin(tilt)  cos(tilt)];
+%r_sc_Sun_ECI= R1_eps'*(r_sc_Sun_ecliptic); 
 
-
-for j=1:size(Y(:,1))
-    [~,~,~,~,~,theta_sc,~]=car2par(Y(j,1:3)',Y(j,4:6)',mu_E);
+%for j=1:size(Y(:,1))
+%    [~,~,~,~,~,theta_sc,~]=car2par(Y(j,1:3)',Y(j,4:6)',mu_E);
 %     R1_i=[1 0 0; 0 cos(i) sin(i); 0 -sin(i) cos(i)];
 %     R3_Om=[cos(Om) sin(Om) 0; -sin(Om) cos(Om) 0; 0 0 1];
 %     R3_om_th=[cos(om+theta_sc) sin(om+theta_sc) 0; -sin(om+theta_sc) cos(om+theta_sc) 0; 0 0 1];
     
-    r_sc_Sun_ECI(j,:)= R1_eps*(r_sc_Sun_ecliptic(j,:)');  
-end 
+    %r_sc_Sun_ECI(j,:)= R1_eps*(r_sc_Sun_ecliptic(j,:)');  
+%end 
 
 
 %Orbit propagation with Cartesian Coordinates:
@@ -172,8 +172,8 @@ end
 
 %Orbit propagation in Keplerian Elements using Gauss' planetary equations:
 tspan = linspace( 0, 100*T, 1000 );
-options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
-[ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2,R_E), mu_E), tspan_pert, kep0, options );
+options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14);
+[ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E), mu_E), tspan_pert, kep0, options );
 
 % Semi-Major Axis, a
 N = 100;
