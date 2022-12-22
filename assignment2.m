@@ -162,7 +162,7 @@ r_E_S=Y_earth(:,1:3);
 %Orbit propagation with Cartesian Coordinates:
 tspan_pert = linspace( 0, 100*T, 1000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
-[ T_J2, S_J2 ] = ode113(@(t,s) perturbed_ode_2bp(t,s, mu_E, J2, R_E), tspan_pert, y0, options );
+[ T_J2, S_J2 ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E), tspan_pert, y0, options );
 
 for k=1:size(S_J2,1)
    [a_p(k),e_p(k),i_p(k),OM_p(k),om_p(k),th_p(k),~]=car2par(S_J2(k,1:3)', S_J2(k,4:6)',mu_E);
