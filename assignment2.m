@@ -154,10 +154,24 @@ for j=1:size(S_Gauss,1)
     [r_Gauss(j,:), ~] = par2car(S_Gauss(j,1), S_Gauss(j,2), S_Gauss(j,3), S_Gauss(j,4), S_Gauss(j,5), S_Gauss(j,6), mu_E);
 end
 
-earth_sphere
-hold on
-plot3( r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3));
-hold off
+% hold on
+% plot3( r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3));
+% hold off
+
+ earth_sphere
+ x = r_Gauss(:,1);
+ y = r_Gauss(:,2); 
+ z = r_Gauss(:,3);
+view(3);
+hold on; grid on;
+c = colorbar;
+c.Label.String = 'Elevation (ft in 1000s)';
+ color = jet(length(T_Gauss)-1);
+ for k = 2:size(T_Gauss,1)
+     plot3(x(k-1:k),y(k-1:k),z(k-1:k),'color',color(k-1,:))
+%     axis([0 1800.7 -1.7 1.7 -1.3 1.3])
+    
+ end
 
 % plotting perturbed orbit (2)
 % view([270 45])
