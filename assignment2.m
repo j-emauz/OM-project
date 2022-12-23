@@ -118,9 +118,10 @@ t = tic;
 tCPU_Cartesian_start = cputime;
 [ T_J2, S_perturbed ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E, initial_date, AMR, Cr, 2), tspan_pert, y0, options );
 tCPU_Cartesian = cputime - tCPU_Cartesian_start;
-T = toc (t);
+time_computation = toc (t);
 
 % plotting perturbed orbit (1)
+figure
 earth_sphere
 hold on
 plot3( S_perturbed(:,1), S_perturbed(:,2), S_perturbed(:,3), 'r-','LineWidth',1);
@@ -128,6 +129,7 @@ hold off
 
 % plotting perturbed orbit (2)
 % view([270 45])
+figure
 comet3(S_perturbed(:,1), S_perturbed(:,2), S_perturbed(:,3))
 title('Perturbed orbit using Cartesian coordinates');
 hold off
@@ -141,7 +143,6 @@ for k=1:size(S_perturbed,1)
 end
 
 %% Orbit propagation in Keplerian Elements using Gauss' planetary equations:
-tspan = linspace( 0, 100*T, 10000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14);
 
 % computational time
@@ -157,7 +158,7 @@ end
 % hold on
 % plot3( r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3));
 % hold off
-
+figure
  earth_sphere
  x = r_Gauss(:,1);
  y = r_Gauss(:,2); 
@@ -165,7 +166,7 @@ end
 view(3);
 hold on; grid on;
 c = colorbar;
-c.Label.String = 'Elevation (ft in 1000s)';
+c.Label.String = 'Time [s]';
  color = jet(length(T_Gauss)-1);
  for k = 2:size(T_Gauss,1)
      plot3(x(k-1:k),y(k-1:k),z(k-1:k),'color',color(k-1,:))
@@ -175,11 +176,12 @@ c.Label.String = 'Elevation (ft in 1000s)';
 
 % plotting perturbed orbit (2)
 % view([270 45])
-comet3(S_Gauss(:,1), S_Gauss(:,2), S_Gauss(:,3))
-title('Perturbed orbit using Cartesian coordinates');
-hold off
+% comet3(r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3))
+% title('Perturbed orbit using Cartesian coordinates');
+% hold off
 
 % Semi-Major Axis, a
+figure
 N = 100;
 amean = movmean(S_Gauss(:, 1), N);
 hold on;
@@ -197,7 +199,7 @@ title('Semi-major axis error');
 
 % Eccentricity, e
 figure;
-N = 500;
+N = 100;
 emean = movmean(S_Gauss(:, 2), N);
 plot(T_Gauss/T,S_Gauss(:,2));
 title('eccentricity');
@@ -214,7 +216,7 @@ title('eccentricity error');
 
 % Inclination, i
 figure;
-N = 500;
+N = 100;
 imean = movmean(S_Gauss(:, 3), N);
 plot(T_Gauss/T,S_Gauss(:,3));
 hold on
@@ -231,7 +233,7 @@ title('inclination error');
 
 % Right Ascension of the Ascending Node, OM
 figure;
-N = 500;
+N = 100;
 OMmean = movmean(S_Gauss(:, 4), N);
 plot(T_Gauss/T,S_Gauss(:,4));
 hold on
@@ -248,7 +250,7 @@ title('Right Ascension of the Ascending Node error');
 
 % Argument of pericenter, om
 figure;
-N = 500;
+N = 100;
 ommean = movmean(S_Gauss(:, 5), N);
 plot(T_Gauss/T,S_Gauss(:,5));
 hold on
@@ -266,7 +268,7 @@ title('argument of pericenter error');
 % True Anomaly, theta
 figure;
 S_Gauss(:, 6) = wrapTo2Pi(S_Gauss(:,6));
-N = 500;
+N = 100;
 thmean = movmean(S_Gauss(:, 6), N);
 plot(T_Gauss/T,S_Gauss(:,6));
 hold on
