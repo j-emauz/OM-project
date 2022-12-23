@@ -44,7 +44,7 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R,  initial_date, AMR, 
     %acc_pert_vec_SRP = R_rsw2eci'*acc_pert_vec_SRP;
     acc_pert_vec_SRP = R_3_om_th*R_1_i*R_3_Om*acc_pert_vec_SRP;
 
-     if dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(r_sc_Sun))==1 && (acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))<=70*pi/180 || acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))>= -70*pi/180)
+     if sign(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(r_sc_Sun)))==1 && (acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))<=70*pi/180 || acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))>= -70*pi/180)
 %              if the two vectors are in the same direction, within a cone of 160 deg,
 %              the SC is in the shadow cone
         acc_pert_vec_SRP=zeros(3,1);

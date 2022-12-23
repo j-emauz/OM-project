@@ -28,7 +28,7 @@ P_sun = 4.57*10^-6; %in N/m^2
   acc_pert_SRP= P_sun*(AU^2)/(norm(r_sc_Sun)^2)*Cr*AMR*1e-3;
   acc_pert_vec_SRP= - acc_pert_SRP*(r_sc_Sun./norm(r_sc_Sun));
 r_E_sc=r;
-       if dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(r_sc_Sun))==1 && (acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))<=70*pi/180 || acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))>= -70*pi/180)
+       if sign(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(r_sc_Sun)))==1 && (acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))<=70*pi/180 || acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))>= -70*pi/180)
              % if the two vectors are in the same direction, within a cone of 160 deg,
              % the SC is in the shadow cone
             acc_pert_vec_SRP=zeros(3,1);
@@ -43,7 +43,7 @@ if(Perturbations == 0)
     acc_pert_vec_SRP = 0;
 elseif Perturbations == 1
     a = 0;
-
+end
 
 dy = [ v
 (-mu/rnorm^3)*r + a + acc_pert_vec_SRP];

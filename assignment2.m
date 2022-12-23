@@ -98,34 +98,6 @@ hold on;
 title('Repeated Ground Track unperturbed 2BP - Given ratio k/m=7/4');
 hold off;
 
-% % 1 orbit: 
-% k=1; 
-% [a_repeating_1, k_1, m_1]=RepeatingGroundTracks(k,omega_E,T,mu_E,1);
-% T_repeating_1=2*pi*sqrt(a_repeating_1^3/mu_E);
-% [lon1,lat1]=groundTrack(T_repeating_1,k_1,theta_G0, y0,t0);
-% hold on; 
-% title('Repeated Ground Track unperturbed 2BP - 1 orbit');
-% hold off;
-% % 1 day: 
-% m=1;
-% [a_repeating_2, k_2,m_2]=RepeatingGroundTracks(m,omega_E,T,mu_E,0);
-% T_repeating_2=2*pi*sqrt(a_repeating_2^3/mu_E);
-% [lon2,lat2]=groundTrack(T_repeating_2,k_2,theta_G0, y0,t0);
-% hold on; 
-% title('Repeated Ground Track unperturbed 2BP - 1 day');
-% hold off;
-% % 10 days:
-% m=10;
-% [a_repeating_3, k_3, m_3]=RepeatingGroundTracks(m,omega_E,T,mu_E,0);
-% T_repeating_3=2*pi*sqrt(a_repeating_3^3/mu_E);
-% [lon3,lat3]=groundTrack(T_repeating_3,k_3,theta_G0, y0,t0);
-% hold on; 
-% title('Repeated Ground Track unperturbed 2BP - 10 days');
-% hold off;
-
-
-
-
 
 %% Perturbed 2BP:
 
@@ -297,15 +269,23 @@ title('true anomaly error');
 
 %% point 7 - Comparison with real data
 
-sc_ephemeris=load("056B_2hours_matrix.mat");
+sc_ephemeris=load("056B_3y_matrix.mat");
 
-e=sc_ephemeris.B2hours.EC;
-a=sc_ephemeris.B2hours.A;
-i=sc_ephemeris.B2hours.IN.*pi/180;
-OM=wrapToPi(sc_ephemeris.B2hours.OM.*pi/180);
-om=wrapToPi(sc_ephemeris.B2hours.W.*pi/180);
-theta=wrapToPi(sc_ephemeris.B2hours.TA.*pi/180);
-date=sc_ephemeris.B2hours.CalendarDateTDB; %date
+%e=sc_ephemeris.B2hours.EC;
+% a=sc_ephemeris.B2hours.A;
+% i=sc_ephemeris.B2hours.IN.*pi/180;
+% OM=wrapToPi(sc_ephemeris.B2hours.OM.*pi/180);
+% om=wrapToPi(sc_ephemeris.B2hours.W.*pi/180);
+% theta=wrapToPi(sc_ephemeris.B2hours.TA.*pi/180);
+% date=sc_ephemeris.B2hours.CalendarDateTDB; %date
+
+e=sc_ephemeris.B3y.EC;
+a=sc_ephemeris.B3y.A;
+i=sc_ephemeris.B3y.IN.*pi/180;
+OM=wrapToPi(sc_ephemeris.B3y.OM.*pi/180);
+om=wrapToPi(sc_ephemeris.B3y.W.*pi/180);
+theta=wrapToPi(sc_ephemeris.B3y.TA.*pi/180);
+date=sc_ephemeris.B3y.CalendarDateTDB; %date
 date0=date(1);
 
 kep0_sc=[a(1),e(1),i(1),OM(1),om(1),theta(1)];
@@ -315,11 +295,11 @@ t0=date2mjd2000(date_0);
 date_final=[2023,1,19,0,0,0];
 t_final=date2mjd2000(date_final);
 
-t_span_sc=t0*24*3600:2*3600:t_final*24*3600;
-
+%t_span_sc=t0*24*3600:2*3600:t_final*24*3600;
+t_span_sc=t0*24*3600:24*3600:t_final*24*3600;
 
 for j=1:length(e)
-    [rr_sc_ephemeris(:,j), vv_sc_ephemeris] = par2car(a(j), e(j), i(j), OM(j), om(j), theta(j), mu_E);
+    [rr_sc_ephemeris(:,j), vv_sc_ephemeris(:,j)] = par2car(a(j), e(j), i(j), OM(j), om(j), theta(j), mu_E);
 end
 
 earth_sphere
@@ -341,6 +321,7 @@ T_sc = 2*pi*sqrt( kep0_sc(1)^3/mu_E )/3600;
 % N = 100;
 % amean = movmean(S_Gauss(:, 1), N);
 % plot(T_sc_Gauss/T_sc, amean);
+%% a
 figure;
 hold on;
 plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,1));
@@ -350,14 +331,8 @@ legend('Gauss','Ephemerides');
 title('semi-major axis');
 hold off
 
-figure
-% relative error
-a_error = (abs(a-S_sc_Gauss(:,1)'))/kep0_sc(1);
-grid on
-semilogy(T_sc_Gauss/T_sc,a_error);
-title('Semi-major axis error');
 
-% Eccentricity, e
+%% Eccentricity, e
 figure;
 % N = 500;
 % emean = movmean(S_Gauss(:, 2), N);
@@ -368,13 +343,7 @@ plot(T_sc_Gauss/T_sc,e);
 % plot(T_Gauss/T, emean);
 legend('Gauss','Ephemeris')
 
-e_error = (abs(S_sc_Gauss(:,2)' - e));
-figure
-grid on
-semilogy(T_sc_Gauss/T_sc,e_error);
-title('eccentricity error');
-
-% Inclination, i
+%% Inclination, i
 figure;
 % N = 500;
 % imean = movmean(S_Gauss(:, 3), N);
@@ -385,13 +354,7 @@ plot(T_sc_Gauss/T_sc,i);
 title('inclination');
 legend('Gauss','Ephemeris')
 
-i_error = (abs(S_sc_Gauss(:,3)'-i))/(2*pi);
-figure
-grid on
-semilogy(T_sc_Gauss/T_sc,i_error);
-title('inclination error');
-
-% Right Ascension of the Ascending Node, OM
+%% Right Ascension of the Ascending Node, OM
 figure;
 % N = 500;
 % OMmean = movmean(S_Gauss(:, 4), N);
@@ -402,13 +365,7 @@ plot(T_sc_Gauss/T_sc,OM);
 legend('Gauss','Ephemeris')
 title('Right Ascension of the Ascending Node');
 
-OM_error = (abs(S_sc_Gauss(:,4)'-OM))/(2*pi);
-figure
-grid on
-semilogy(T_sc_Gauss/T_sc,OM_error);
-title('Right Ascension of the Ascending Node error');
-
-% Argument of pericenter, om
+%% Argument of pericenter, om
 figure;
 % N = 500;
 % ommean = movmean(S_Gauss(:, 5), N);
@@ -419,13 +376,9 @@ plot(T_sc_Gauss/T_sc,om);
 legend('Gauss','Ephemeris')
 title('argument of pericenter');
 
-om_error = (abs(S_sc_Gauss(:,5)'-om))/(2*pi);
-figure
-grid on
-semilogy(T_sc_Gauss/T_sc,om_error);
-title('argument of pericenter error');
 
-% True Anomaly, theta
+
+%% True Anomaly, theta
 figure;
 S_sc_Gauss(:, 6) = wrapTo2Pi(S_sc_Gauss(:,6));
 % N = 500;
