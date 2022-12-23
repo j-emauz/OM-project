@@ -134,22 +134,23 @@ AMR= 10.000; %[m^2/kg]
 P_sun=4.5*10^-6; %[N/m^2]
 Cr=1; 
 
-% Earth orbit around the Sun:
-initial_date=[2022,03,21,12,0,0]; %Spring Equinox
-initial_time=date2mjd2000(initial_date);
-%[kep_E,~]=uplanet(initial_time,3);
-%[r0,v0] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
-%y0 = [r0;v0];
+% % Earth orbit around the Sun:
+% initial_date=[2022,03,21,12,0,0]; %Spring Equinox
+% initial_time=date2mjd2000(initial_date);
+% 
+% [kep_E,~]=uplanet(initial_time,3);
+% [r0,v0] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
+% y0 = [r0;v0];
 % T=2*pi*sqrt(kep_E(1)^3/mu_S);
 % tspan = linspace( 0, T,1000);
 
-% Set options for the ODE solver
-%options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-%[ t, Y_earth ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
-
-%r_E_S=Y_earth(:,1:3);
-%r_sc_E=Y(:,1:3);
-%r_sc_Sun_ecliptic=r_E_S;%r_E_S + r_sc_E
+% % Set options for the ODE solver
+% options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
+% [ t, Y_earth ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+% 
+% r_E_S=Y_earth(:,1:3);
+% r_sc_E=Y(:,1:3);
+% r_sc_Sun_ecliptic=r_E_S; %r_E_S + r_sc_E
 % r_sc_Sun=zeros(length(tspan),3);
     
 %tilt = deg2rad(23.45);
@@ -177,7 +178,7 @@ options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
 t = tic;
 tCPU_Cartesian_start = cputime;
 [ T_J2, S_perturbed ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E), tspan_pert, y0, options );
-tCPU_Cartesian = cputime - tCPU_Cartesian_start
+tCPU_Cartesian = cputime - tCPU_Cartesian_start;
 T = toc (t);
 
 % plotting perturbed orbit (1)
@@ -458,7 +459,7 @@ S_sc_Gauss(:, 6) = wrapTo2Pi(S_sc_Gauss(:,6));
 % thmean = movmean(S_Gauss(:, 6), N);
 plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,6));
 hold on
-plot(T_sc_Gauss/T_sc,th);
+plot(T_sc_Gauss/T_sc,theta);
 % plot(T_sc_Gauss/T, thmean);
 legend('Gauss','Ephemeris')
 title('true anomaly');

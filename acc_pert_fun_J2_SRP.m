@@ -12,7 +12,7 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R)
      t_days=t/3600/24; %days since initial time
      [kep_E,~]=uplanet(initial_time+t_days,3);
      [r_S_E,~] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
-     %[rr, vv] = par2car(s(1), s(2), s(3), s(4), s(5), s(6), mu);
+     [r_E_sc,~] = par2car(s(1), s(2), s(3), s(4), s(5), s(6), mu);
      
      %r_dir = rr./norm(rr);
      %w_dir = cross(rr,vv)./norm(cross(rr,vv));
@@ -32,6 +32,7 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R)
          0  -sin(tilt)  cos(tilt)];
 
     r_sc_Sun= - R_eci2sce'*(r_S_E); 
+    % Earth - Sun vector in the ECI frame
 
     p = s(1)*(1-s(2)^2);
     r = p/(1 + s(2)*cos(s(6)));
@@ -43,7 +44,14 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R)
     acc_pert_vec_SRP=-acc_pert_SRP*(r_sc_Sun./norm(r_sc_Sun));
     
     %acc_pert_vec_SRP = R_rsw2eci'*acc_pert_vec_SRP;
-     acc_pert_vec_SRP = R_3_om_th*R_1_i*R_3_Om*acc_pert_vec_SRP;
-    acc_pert_vec=acc_pert_vec_J2 + acc_pert_vec_SRP;
+    acc_pert_vec_SRP = R_3_om_th*R_1_i*R_3_Om*acc_pert_vec_SRP;
+
+     if dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(r_sc_Sun))==1 && (acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))<=70*pi/180 || acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))>= -70*pi/180)
+%              if the two vectors are in the same direction, within a cone of 160 deg,
+%              the SC is in the shadow cone
+        acc_pert_vec_SRP=zeros(3,1);
+     end
+
+     acc_pert_vec=acc_pert_vec_J2 + acc_pert_vec_SRP;
 
 end
