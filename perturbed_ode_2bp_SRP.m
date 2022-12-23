@@ -1,24 +1,6 @@
-function dy = perturbed_ode_2bp_SRP( t, y, mu, J2, R)
-%ode_2bp ODE system for the two-body problem (Keplerian motion)
-%
-% PROTOTYPE
-% dy = perturbed_ode_2bp( t, y, mu, J2, R)
-%
-% INPUT:
-% t[1] Time (can be omitted, as the system is autonomous) [T]
-% y[6x1] State of the body ( rx, ry, rz, vx, vy, vz ) [ L, L/T ]
-% mu[1] Gravitational parameter of the primary [L^3/T^2]
-%
-% OUTPUT:
-% dy[6x1] Derivative of the state [ L/T^2, L/T^3 ]
-%
-% CONTRIBUTORS:
-% Juan Luis Gonzalo Gomez
-%
-% VERSIONS
-% 2018-09-26: First version
-%
-% -------------------------------------------------------------------------
+function dy = perturbed_ode_2bp_SRP( t, y, mu, J2, R, initial_date, AMR, Cr, Perturbations)
+%perturbations 0 - J2, 1- SRP, 2-SRP+J2
+
 % Position and velocity
 r = y(1:3);
 v = y(4:6);
@@ -26,13 +8,11 @@ v = y(4:6);
 rnorm = norm(r);
 % Set the derivatives of the state
 
-Cr = 1;
 AU = astroConstants(2);
-AMR = 10;%m^2/kg
 mu_S = astroConstants(4);
 P_sun = 4.57*10^-6; %in N/m^2
 
- initial_date=[2022,03,21,12,0,0];
+
  initial_time=date2mjd2000(initial_date);
  t_days=t/3600/24; %days since initial time
  [kep_E,~]=uplanet(initial_time+t_days,3);
@@ -51,10 +31,20 @@ r_E_sc=r;
        if dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(r_sc_Sun))==1 && (acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))<=70*pi/180 || acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))>= -70*pi/180)
              % if the two vectors are in the same direction, within a cone of 160 deg,
              % the SC is in the shadow cone
-        acc_pert_vec_SRP=zeros(3,1);
+            acc_pert_vec_SRP=zeros(3,1);
        end
+       
+       
+
 
 a=3/2*J2*mu*R^2/rnorm^4*[r(1)/rnorm*(5*r(3)^2/rnorm^2-1); r(2)/rnorm*(5*r(3)^2/rnorm^2-1); r(3)/rnorm*(5*r(3)^2/rnorm^2-3)   ];
+
+if(Perturbations == 0)
+    acc_pert_vec_SRP = 0;
+elseif Perturbations == 1
+    a = 0;
+
+
 dy = [ v
 (-mu/rnorm^3)*r + a + acc_pert_vec_SRP];
 

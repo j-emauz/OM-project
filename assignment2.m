@@ -133,40 +133,7 @@ hold off;
 AMR= 10.000; %[m^2/kg]
 P_sun=4.5*10^-6; %[N/m^2]
 Cr=1; 
-
-% % Earth orbit around the Sun:
-% initial_date=[2022,03,21,12,0,0]; %Spring Equinox
-% initial_time=date2mjd2000(initial_date);
-% 
-% [kep_E,~]=uplanet(initial_time,3);
-% [r0,v0] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
-% y0 = [r0;v0];
-% T=2*pi*sqrt(kep_E(1)^3/mu_S);
-% tspan = linspace( 0, T,1000);
-
-% % Set options for the ODE solver
-% options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-% [ t, Y_earth ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
-% 
-% r_E_S=Y_earth(:,1:3);
-% r_sc_E=Y(:,1:3);
-% r_sc_Sun_ecliptic=r_E_S; %r_E_S + r_sc_E
-% r_sc_Sun=zeros(length(tspan),3);
-    
-%tilt = deg2rad(23.45);
-%R1_eps = [1   0   0;                %ECI -> Sun-Centered-Ecliptic
-         % 0  cos(tilt)   sin(tilt);
-          %0  -sin(tilt)  cos(tilt)];
-%r_sc_Sun_ECI= R1_eps'*(r_sc_Sun_ecliptic); 
-
-%for j=1:size(Y(:,1))
-%    [~,~,~,~,~,theta_sc,~]=car2par(Y(j,1:3)',Y(j,4:6)',mu_E);
-%     R1_i=[1 0 0; 0 cos(i) sin(i); 0 -sin(i) cos(i)];
-%     R3_Om=[cos(Om) sin(Om) 0; -sin(Om) cos(Om) 0; 0 0 1];
-%     R3_om_th=[cos(om+theta_sc) sin(om+theta_sc) 0; -sin(om+theta_sc) cos(om+theta_sc) 0; 0 0 1];
-    
-    %r_sc_Sun_ECI(j,:)= R1_eps*(r_sc_Sun_ecliptic(j,:)');  
-%end 
+initial_date=[2022,03,21,12,0,0];
 
 
 % Orbit propagation with Cartesian Coordinates:
@@ -177,7 +144,7 @@ options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
 % computational time
 t = tic;
 tCPU_Cartesian_start = cputime;
-[ T_J2, S_perturbed ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E), tspan_pert, y0, options );
+[ T_J2, S_perturbed ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E, initial_date, AMR, Cr, 2), tspan_pert, y0, options );
 tCPU_Cartesian = cputime - tCPU_Cartesian_start;
 T = toc (t);
 
@@ -207,7 +174,7 @@ options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14);
 
 % computational time
 tCPU_Gauss_start = cputime;
-[ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E), mu_E), tspan_pert, kep0, options );
+[ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E, initial_date, AMR, Cr, 2), mu_E), tspan_pert, kep0, options );
 tCPU_Gauss = cputime - tCPU_Gauss_start;
 
 
@@ -335,9 +302,9 @@ sc_ephemeris=load("056B_2hours_matrix.mat");
 e=sc_ephemeris.B2hours.EC;
 a=sc_ephemeris.B2hours.A;
 i=sc_ephemeris.B2hours.IN.*pi/180;
-OM=sc_ephemeris.B2hours.OM.*pi/180;
-om=sc_ephemeris.B2hours.W.*pi/180;
-theta=sc_ephemeris.B2hours.TA.*pi/180;
+OM=wrapToPi(sc_ephemeris.B2hours.OM.*pi/180);
+om=wrapToPi(sc_ephemeris.B2hours.W.*pi/180);
+theta=wrapToPi(sc_ephemeris.B2hours.TA.*pi/180);
 date=sc_ephemeris.B2hours.CalendarDateTDB; %date
 date0=date(1);
 
@@ -348,11 +315,11 @@ t0=date2mjd2000(date_0);
 date_final=[2023,1,19,0,0,0];
 t_final=date2mjd2000(date_final);
 
-t_span_sc=t0:1/24*2:t_final;
+t_span_sc=t0*24*3600:2*3600:t_final*24*3600;
 
 
 for j=1:length(e)
-[rr_sc_ephemeris(:,j), vv_sc_ephemeris] = par2car(a(j), e(j), i(j), OM(j), om(j), theta(j), mu_E);
+    [rr_sc_ephemeris(:,j), vv_sc_ephemeris] = par2car(a(j), e(j), i(j), OM(j), om(j), theta(j), mu_E);
 end
 
 earth_sphere
@@ -362,24 +329,30 @@ hold off
 
 %% 7.c
 close all
+AMR = 0.1;
+Cr = 1;
 T_sc = 2*pi*sqrt( kep0_sc(1)^3/mu_E )/3600; 
 % tspan_pert = linspace( 0, 100*T_sc, 10000 );
-[ T_sc_Gauss, S_sc_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E), mu_E), t_span_sc, kep0_sc, options );
-
+[ T_sc_Gauss, S_sc_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E, date_0, AMR, Cr, 2), mu_E), t_span_sc, kep0_sc, options );
+%[rr, vv] = par2car(kep0_sc(1), kep0_sc(2), kep0_sc(3), kep0_sc(4), kep0_sc(5), kep0_sc(6), mu_E);
+%kep0_sc = [rr; vv];
+%[ T_sc_Gauss, S_sc_Gauss ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E,J2, R_E, date_0, AMR, Cr, 2), t_span_sc, kep0_sc, options );
 % Semi-Major Axis, a
 % N = 100;
 % amean = movmean(S_Gauss(:, 1), N);
-% hold on;
 % plot(T_sc_Gauss/T_sc, amean);
-plot(T_sc_Gauss/T_sc,a);
+figure;
+hold on;
 plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,1));
-legend('Ephemeris','Gauss');
+plot(T_sc_Gauss/T_sc,a);
+
+legend('Gauss','Ephemerides');
 title('semi-major axis');
+hold off
 
 figure
 % relative error
 a_error = (abs(a-S_sc_Gauss(:,1)'))/kep0_sc(1);
-figure
 grid on
 semilogy(T_sc_Gauss/T_sc,a_error);
 title('Semi-major axis error');

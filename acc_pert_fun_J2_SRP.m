@@ -1,13 +1,11 @@
-function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R)
+function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R,  initial_date, AMR, Cr, Perturbations)
  % Evaluate the perturbing accelerations in a given
     % RSW
-    Cr = 1;
+    % Perturbations -> 0: J2 1: SRP 2: J2+SRP
     AU = astroConstants(2);
-    AMR = 10;
     mu_S = astroConstants(4);
     P_sun = 4.5*10^-6;
 
-     initial_date=[2022,03,21,12,0,0];
      initial_time=date2mjd2000(initial_date);
      t_days=t/3600/24; %days since initial time
      [kep_E,~]=uplanet(initial_time+t_days,3);
@@ -51,7 +49,13 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R)
 %              the SC is in the shadow cone
         acc_pert_vec_SRP=zeros(3,1);
      end
-
-     acc_pert_vec=acc_pert_vec_J2 + acc_pert_vec_SRP;
+     
+     if Perturbations==0
+         acc_pert_vec=acc_pert_vec_J2;
+     elseif Perturbations == 1
+         acc_pert_vec=acc_pert_vec_SRP;
+     else 
+         acc_pert_vec=acc_pert_vec_J2 + acc_pert_vec_SRP;
+     end
 
 end
