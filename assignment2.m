@@ -135,7 +135,7 @@ P_sun=4.5*10^-6; %[N/m^2]
 Cr=1; 
 
 % Earth orbit around the Sun:
-%initial_date=[2022,03,21,12,0,0]; %Spring Equinox
+initial_date=[2022,03,21,12,0,0]; %Spring Equinox
 initial_time=date2mjd2000(initial_date);
 %[kep_E,~]=uplanet(initial_time,3);
 %[r0,v0] = par2car(kep_E(1),kep_E(2),kep_E(3),kep_E(4),kep_E(5),kep_E(6),mu_S);
@@ -169,9 +169,16 @@ initial_time=date2mjd2000(initial_date);
 
 
 % Orbit propagation with Cartesian Coordinates:
+
 tspan_pert = linspace( 0, 100*T, 10000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
+
+% computational time
+t = tic;
+tCPU_Cartesian_start = cputime;
 [ T_J2, S_perturbed ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E), tspan_pert, y0, options );
+tCPU_Cartesian = cputime - tCPU_Cartesian_start
+T = toc (t);
 
 % plotting perturbed orbit (1)
 earth_sphere
@@ -193,12 +200,15 @@ for k=1:size(S_perturbed,1)
 %@(t_tt, y_tt) ode_2bp(t_tt, y_tt, mu), tspan, y0_t, options);
 end
 
-
-
 %% Orbit propagation in Keplerian Elements using Gauss' planetary equations:
 tspan = linspace( 0, 100*T, 10000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14);
+
+% computational time
+tCPU_Gauss_start = cputime;
 [ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E), mu_E), tspan_pert, kep0, options );
+tCPU_Gauss = cputime - tCPU_Gauss_start;
+
 
 for j=1:size(S_Gauss,1)
     [r_Gauss(j,:), ~] = par2car(S_Gauss(j,1), S_Gauss(j,2), S_Gauss(j,3), S_Gauss(j,4), S_Gauss(j,5), S_Gauss(j,6), mu_E);
@@ -206,7 +216,7 @@ end
 
 earth_sphere
 hold on
-waterfall( r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3));
+plot3( r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3));
 hold off
 
 % plotting perturbed orbit (2)
@@ -319,21 +329,136 @@ title('true anomaly error');
 
 %% point 7 - Comparison with real data
 
-sc_ephemeris=load("056B_3y_matrix.mat");
+sc_ephemeris=load("056B_2hours_matrix.mat");
 
-e=sc_ephemeris.B3y.EC;
-a=sc_ephemeris.B3y.A;
-i=sc_ephemeris.B3y.IN.*pi/180;
-OM=sc_ephemeris.B3y.OM.*pi/180;
-om=sc_ephemeris.B3y.W.*pi/180;
-theta=sc_ephemeris.B3y.TA.*pi/180;
-date=sc_ephemeris.B3y.CalendarDateTDB; %date
+e=sc_ephemeris.B2hours.EC;
+a=sc_ephemeris.B2hours.A;
+i=sc_ephemeris.B2hours.IN.*pi/180;
+OM=sc_ephemeris.B2hours.OM.*pi/180;
+om=sc_ephemeris.B2hours.W.*pi/180;
+theta=sc_ephemeris.B2hours.TA.*pi/180;
+date=sc_ephemeris.B2hours.CalendarDateTDB; %date
 date0=date(1);
+
+kep0_sc=[a(1),e(1),i(1),OM(1),om(1),theta(1)];
+
 date_0=[2020,12,22,0,0,0];
 t0=date2mjd2000(date_0);
 date_final=[2023,1,19,0,0,0];
 t_final=date2mjd2000(date_final);
 
-t_span_sc=t0:1:t_final;
+t_span_sc=t0:1/24*2:t_final;
 
 
+for j=1:length(e)
+[rr_sc_ephemeris(:,j), vv_sc_ephemeris] = par2car(a(j), e(j), i(j), OM(j), om(j), theta(j), mu_E);
+end
+
+earth_sphere
+hold on
+plot3( rr_sc_ephemeris(1,:), rr_sc_ephemeris(2,:), rr_sc_ephemeris(3,:),'r-','LineWidth',1);
+hold off
+
+%% 7.c
+close all
+T_sc = 2*pi*sqrt( kep0_sc(1)^3/mu_E )/3600; 
+% tspan_pert = linspace( 0, 100*T_sc, 10000 );
+[ T_sc_Gauss, S_sc_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E), mu_E), t_span_sc, kep0_sc, options );
+
+% Semi-Major Axis, a
+% N = 100;
+% amean = movmean(S_Gauss(:, 1), N);
+% hold on;
+% plot(T_sc_Gauss/T_sc, amean);
+plot(T_sc_Gauss/T_sc,a);
+plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,1));
+legend('Ephemeris','Gauss');
+title('semi-major axis');
+
+figure
+% relative error
+a_error = (abs(a-S_sc_Gauss(:,1)'))/kep0_sc(1);
+figure
+grid on
+semilogy(T_sc_Gauss/T_sc,a_error);
+title('Semi-major axis error');
+
+% Eccentricity, e
+figure;
+% N = 500;
+% emean = movmean(S_Gauss(:, 2), N);
+plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,2));
+title('eccentricity');
+hold on
+plot(T_sc_Gauss/T_sc,e);
+% plot(T_Gauss/T, emean);
+legend('Gauss','Ephemeris')
+
+e_error = (abs(S_sc_Gauss(:,2)' - e));
+figure
+grid on
+semilogy(T_sc_Gauss/T_sc,e_error);
+title('eccentricity error');
+
+% Inclination, i
+figure;
+% N = 500;
+% imean = movmean(S_Gauss(:, 3), N);
+plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,3));
+hold on
+plot(T_sc_Gauss/T_sc,i);
+% plot(T_Gauss/T, imean);
+title('inclination');
+legend('Gauss','Ephemeris')
+
+i_error = (abs(S_sc_Gauss(:,3)'-i))/(2*pi);
+figure
+grid on
+semilogy(T_sc_Gauss/T_sc,i_error);
+title('inclination error');
+
+% Right Ascension of the Ascending Node, OM
+figure;
+% N = 500;
+% OMmean = movmean(S_Gauss(:, 4), N);
+plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,4));
+hold on
+plot(T_sc_Gauss/T_sc,OM);
+% plot(T_Gauss/T, OMmean);
+legend('Gauss','Ephemeris')
+title('Right Ascension of the Ascending Node');
+
+OM_error = (abs(S_sc_Gauss(:,4)'-OM))/(2*pi);
+figure
+grid on
+semilogy(T_sc_Gauss/T_sc,OM_error);
+title('Right Ascension of the Ascending Node error');
+
+% Argument of pericenter, om
+figure;
+% N = 500;
+% ommean = movmean(S_Gauss(:, 5), N);
+plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,5));
+hold on
+plot(T_sc_Gauss/T_sc,om);
+% plot(T_sc_Gauss/T_sc, ommean);
+legend('Gauss','Ephemeris')
+title('argument of pericenter');
+
+om_error = (abs(S_sc_Gauss(:,5)'-om))/(2*pi);
+figure
+grid on
+semilogy(T_sc_Gauss/T_sc,om_error);
+title('argument of pericenter error');
+
+% True Anomaly, theta
+figure;
+S_sc_Gauss(:, 6) = wrapTo2Pi(S_sc_Gauss(:,6));
+% N = 500;
+% thmean = movmean(S_Gauss(:, 6), N);
+plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,6));
+hold on
+plot(T_sc_Gauss/T_sc,th);
+% plot(T_sc_Gauss/T, thmean);
+legend('Gauss','Ephemeris')
+title('true anomaly');
