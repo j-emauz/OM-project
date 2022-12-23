@@ -110,7 +110,7 @@ initial_date=[2022,03,21,12,0,0];
 
 % Orbit propagation with Cartesian Coordinates:
 
-tspan_pert = linspace( 0, 100*T, 10000 );
+tspan_pert = linspace( 0, 1000*T, 100000 );
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
 
 % computational time
@@ -185,10 +185,10 @@ figure
 N = 100;
 amean = movmean(S_Gauss(:, 1), N);
 hold on;
-plot(T_Gauss/T, amean);
 plot(T_J2/T,a_p);
 plot(T_Gauss/T,S_Gauss(:,1));
-legend('average','Cartesian','Gauss');
+plot(T_Gauss/T, amean);
+legend('Cartesian','Gauss','average');
 title('semi-major axis');
 a_error = (abs(a_p-S_Gauss(:,1)'))/kep0(1);
 
@@ -201,12 +201,14 @@ title('Semi-major axis error');
 figure;
 N = 100;
 emean = movmean(S_Gauss(:, 2), N);
+emean2 = movmean(S_Gauss(:,2),1000000);
 plot(T_Gauss/T,S_Gauss(:,2));
 title('eccentricity');
 hold on
 plot(T_J2/T,e_p);
 plot(T_Gauss/T, emean);
-legend('Gauss','Cartesian','average')
+plot(T_Gauss/T, emean2)
+legend('Gauss','Cartesian','short-term average', 'secular average')
 
 e_error = (abs(S_Gauss(:,2)'-e_p));
 figure
