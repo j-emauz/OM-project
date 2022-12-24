@@ -33,8 +33,6 @@ Tsyn_ES=T_Saturn*T_Earth/(abs(T_Saturn-T_Earth));
 %GA_window_2=[2042,01,30,0,0,0]; %assumption for fly-by window
 
 
-
-
 %[kepNEO_arr,~,~] = ephNEO(date2mjd2000(GA_window_2),86);
 [kepNEO_arr,~,~] = ephNEO(0,86);
 T_NEO=2*pi*sqrt( (kepNEO_arr(1))^3/mu_S ); % Orbital period [1/s]
@@ -141,22 +139,32 @@ Delta_t_FlyBy_days=Delta_t_FlyBy/3600/24;
 clc
 
 [X, Y] = meshgrid(tspan_dept, tspan_GA);
-Z = dv_grid_arc1(X, Y, p1, p2, mu_S);
+Z = dv_porkchop(X, Y, p1, p2, @dv_arc1,mu_S);
 
-V=5:30;
+V=1:2:30;
 contour(X./365.25 + 2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
-colorbar
+c_porkchop_p=colorbar;
+c_porkchop_p.Label.String = ' Δv [s]';
+
 xlabel('Departure time [years]');
 ylabel('Arrival time [years]');
 title('Transfer to Saturn Porkchop plot');
 hold on;
 scatter(tspan_dept(x)/365.25+2000,tspan_GA(y)/365.25+2000,20,'red','filled');
-% surface(X,Y,Z)
+
+figure
+grid off
+surface(X./365.25 + 2000,Y./365.25 + 2000,Z)
+colorbar
+xlabel('Departure time [years]');
+ylabel('Arrival time [years]');
+hold on
+% scatter(tspan_dept(x)/365.25+2000,tspan_GA(y)/365.25+2000,300,'red','filled');
 
 %% Porkchop plot asteroid
 
 [X, Y] = meshgrid(tspan_GA, tspan_arrt);
-Z = dv_calcgrid(X, Y, p1, p2, mu_S);
+Z = dv_porkchop(X, Y, p2,86, @dv_arcNEO,mu_S);
 
 V=5:30;
 contour(X./365.25 +2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
@@ -166,6 +174,24 @@ ylabel('Arrival time [years]');
 title('Transfer to Asteroid Porkchop plot');
 hold on;
 scatter(tspan_GA(y)/365.25+2000,tspan_arrt(z)/365.25+2000,20,'red','filled');
+
+%% cost plot ????
+% tspan_1=linspace(t_dept1,t_GA_window_2, 1000);
+% tspan_2=linspace(t_GA_window_2,t_arrt2, 1000);
+
+% [X, Y] = meshgrid(tspan_1, tspan_2);
+[X, Y] = meshgrid(tspan_dept, tspan_arrt);
+Z = dv_porkchop(X, Y, p1, p2, mu_S);
+
+V=10:2:40;
+contour(X./365.25 +2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
+colorbar
+xlabel('Departure time [years]');
+ylabel('Arrival time [years]');
+title('Cost plot');
+hold on;
+scatter(tspan_dept(x)/365.25+2000,tspan_arrt(z)/365.25+2000,20,'red','filled');
+
 %% Plot the planetocentric hyperbolic arcs:
 earth_sphere
 hold on
