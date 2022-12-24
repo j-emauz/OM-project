@@ -110,8 +110,8 @@ initial_date=[2022,03,21,12,0,0];
 
 % Orbit propagation with Cartesian Coordinates:
 
-tspan_pert = linspace( 0, 1000*T, 100000 );
-options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14 );
+tspan_pert = linspace(0, 1000*T, 100000);
+options = odeset('RelTol', 1e-13, 'AbsTol', 1e-14 );
 
 % computational time
 t = tic;
@@ -138,8 +138,7 @@ hold off
 % in the following plots
 for k=1:size(S_perturbed,1)
    [a_p(k),e_p(k),i_p(k),OM_p(k),om_p(k),th_p(k),~]=car2par(S_perturbed(k,1:3)', S_perturbed(k,4:6)',mu_E);
-%[a,e,i,OM,om,th, ee]=car2par(rr,vv,mu)
-%@(t_tt, y_tt) ode_2bp(t_tt, y_tt, mu), tspan, y0_t, options);
+
 end
 
 %% Orbit propagation in Keplerian Elements using Gauss' planetary equations:
@@ -190,12 +189,16 @@ plot(T_Gauss/T,S_Gauss(:,1));
 plot(T_Gauss/T, amean);
 legend('Cartesian','Gauss','average');
 title('semi-major axis');
+
 a_error = (abs(a_p-S_Gauss(:,1)'))/kep0(1);
+max(a_error)
 
 figure
 grid on
 semilogy(T_Gauss/T,a_error);
-title('Semi-major axis error');
+xlabel('Time [T]') 
+ylabel('$|a_{Car} - a_{Gauss}|/a_0$','Interpreter','Latex')
+%title('Semi-major axis error');
 
 % Eccentricity, e
 figure;
@@ -214,7 +217,9 @@ e_error = (abs(S_Gauss(:,2)'-e_p));
 figure
 grid on
 semilogy(T_Gauss/T,e_error);
-title('eccentricity error');
+xlabel('Time [T]') 
+ylabel('$|e_{Car} - e_{Gauss}|$','Interpreter','Latex')
+%title('eccentricity error');
 
 % Inclination, i
 figure;
@@ -231,7 +236,9 @@ i_error = (abs(S_Gauss(:,3)'-i_p))/(2*pi);
 figure
 grid on
 semilogy(T_Gauss/T,i_error);
-title('inclination error');
+xlabel('Time [T]') 
+ylabel('$|i_{Car} - i_{Gauss}|/2\pi$','Interpreter','Latex')
+%title('inclination error');
 
 % Right Ascension of the Ascending Node, OM
 figure;
@@ -244,11 +251,13 @@ plot(T_Gauss/T, OMmean);
 legend('Gauss','Cartesian','average')
 title('Right Ascension of the Ascending Node');
 
-OM_error = (abs(S_Gauss(:,4)'-OM_p))/(2*pi);
+OM_error = (abs(S_Gauss(:,4)'- wrapToPi(OM_p)))/(2*pi);
 figure
 grid on
 semilogy(T_Gauss/T,OM_error);
-title('Right Ascension of the Ascending Node error');
+xlabel('Time [T]') 
+ylabel('$|\Omega_{Car} - \Omega_{Gauss}|/2\pi$','Interpreter','Latex')
+%title('Right Ascension of the Ascending Node error');
 
 % Argument of pericenter, om
 figure;
@@ -265,11 +274,14 @@ om_error = (abs(S_Gauss(:,5)'-om_p))/(2*pi);
 figure
 grid on
 semilogy(T_Gauss/T,om_error);
-title('argument of pericenter error');
+xlabel('Time [T]') 
+ylabel('$|\omega_{Car} - \omega_{Gauss}|/2\pi$','Interpreter','Latex')
+%title('argument of pericenter error');
 
 % True Anomaly, theta
 figure;
-S_Gauss(:, 6) = wrapTo2Pi(S_Gauss(:,6));
+S_Gauss(:, 6) = wrapToPi(S_Gauss(:,6));
+th_p = wrapToPi(th_p);
 N = 100;
 thmean = movmean(S_Gauss(:, 6), N);
 plot(T_Gauss/T,S_Gauss(:,6));
@@ -283,8 +295,246 @@ th_error = (abs(S_Gauss(:,6)'-th_p))/(2*pi);
 figure
 grid on
 semilogy(T_Gauss/T,th_error);
-title('true anomaly error');
+xlabel('Time [T]') 
+ylabel('$|\theta_{Car} - \theta_{Gauss}|/2\pi$','Interpreter','Latex')
+%title('true anomaly error');
 
+%% Just J2 plots
+[ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E, initial_date, AMR, Cr, 0), mu_E), tspan_pert, kep0, options );
+
+% Semi-Major Axis, a
+figure
+N = 100;
+amean = movmean(S_Gauss(:, 1), N);
+hold on;
+plot(T_Gauss/T,S_Gauss(:,1));
+plot(T_Gauss/T, amean);
+legend('Gauss','average');
+xlabel('Time [T]') 
+ylabel('$a_{J2}$ (km)','Interpreter','Latex')
+title('semi-major axis J2');
+
+% Eccentricity, e
+figure;
+N = 100;
+emean = movmean(S_Gauss(:, 2), N);
+emean2 = movmean(S_Gauss(:,2),1000000);
+plot(T_Gauss/T,S_Gauss(:,2));
+title('eccentricity');
+hold on
+plot(T_Gauss/T, emean);
+plot(T_Gauss/T, emean2)
+legend('Gauss','short-term average', 'secular average')
+xlabel('Time [T]') 
+ylabel('$e_{J2}$','Interpreter','Latex')
+title('eccentricity J2');
+
+% Inclination, i
+figure;
+N = 100;
+imean = movmean(S_Gauss(:, 3), N);
+plot(T_Gauss/T,S_Gauss(:,3));
+hold on
+plot(T_Gauss/T, imean);
+xlabel('Time [T]') 
+ylabel('$i_{J2}$ (rad)','Interpreter','Latex')
+title('inclination J2');
+legend('Gauss','average')
+
+% Right Ascension of the Ascending Node, OM
+figure;
+N = 100;
+OMmean = movmean(S_Gauss(:, 4), N);
+plot(T_Gauss/T,S_Gauss(:,4));
+hold on
+plot(T_Gauss/T, OMmean);
+legend('Gauss','average')
+xlabel('Time [T]') 
+ylabel('$\Omega_{J2}$ (rad)','Interpreter','Latex')
+title('Right Ascension of the Ascending Node J2');
+
+% Argument of pericenter, om
+figure;
+N = 100;
+ommean = movmean(S_Gauss(:, 5), N);
+plot(T_Gauss/T,S_Gauss(:,5));
+hold on
+plot(T_Gauss/T, ommean);
+legend('Gauss','average')
+xlabel('Time [T]') 
+ylabel('$\omega_{J2}$ (rad)','Interpreter','Latex')
+title('argument of pericenter J2');
+
+% True Anomaly, theta
+figure;
+S_Gauss(:, 6) = wrapToPi(S_Gauss(:,6));
+N = 100;
+thmean = movmean(S_Gauss(:, 6), N);
+plot(T_Gauss/T,S_Gauss(:,6));
+hold on
+plot(T_Gauss/T, thmean);
+xlabel('Time [T]') 
+ylabel('$\theta_{J2}$ (rad)','Interpreter','Latex')
+legend('Gauss','average')
+title('true anomaly J2');
+
+%% Just SRP plots
+[ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E, initial_date, AMR, Cr, 1), mu_E), tspan_pert, kep0, options );
+
+% Semi-Major Axis, a
+figure
+N = 100;
+amean = movmean(S_Gauss(:, 1), N);
+hold on;
+plot(T_Gauss/T,S_Gauss(:,1));
+plot(T_Gauss/T, amean);
+legend('Gauss','average');
+xlabel('Time [T]') 
+ylabel('$a_{J2}$ (km)','Interpreter','Latex')
+title('semi-major axis J2');
+
+% Eccentricity, e
+figure;
+N = 100;
+emean = movmean(S_Gauss(:, 2), N);
+emean2 = movmean(S_Gauss(:,2),1000000);
+plot(T_Gauss/T,S_Gauss(:,2));
+title('eccentricity');
+hold on
+plot(T_Gauss/T, emean);
+plot(T_Gauss/T, emean2)
+legend('Gauss','short-term average', 'secular average')
+xlabel('Time [T]') 
+ylabel('$e_{J2}$','Interpreter','Latex')
+title('eccentricity J2');
+
+% Inclination, i
+figure;
+N = 100;
+imean = movmean(S_Gauss(:, 3), N);
+plot(T_Gauss/T,S_Gauss(:,3));
+hold on
+plot(T_Gauss/T, imean);
+xlabel('Time [T]') 
+ylabel('$i_{J2}$ (rad)','Interpreter','Latex')
+title('inclination J2');
+legend('Gauss','average')
+
+% Right Ascension of the Ascending Node, OM
+figure;
+N = 100;
+OMmean = movmean(S_Gauss(:, 4), N);
+plot(T_Gauss/T,S_Gauss(:,4));
+hold on
+plot(T_Gauss/T, OMmean);
+legend('Gauss','average')
+xlabel('Time [T]') 
+ylabel('$\Omega_{J2}$ (rad)','Interpreter','Latex')
+title('Right Ascension of the Ascending Node J2');
+
+% Argument of pericenter, om
+figure;
+N = 100;
+ommean = movmean(S_Gauss(:, 5), N);
+plot(T_Gauss/T,S_Gauss(:,5));
+hold on
+plot(T_Gauss/T, ommean);
+legend('Gauss','average')
+xlabel('Time [T]') 
+ylabel('$\omega_{J2}$ (rad)','Interpreter','Latex')
+title('argument of pericenter J2');
+
+% True Anomaly, theta
+figure;
+S_Gauss(:, 6) = wrapToPi(S_Gauss(:,6));
+N = 100;
+thmean = movmean(S_Gauss(:, 6), N);
+plot(T_Gauss/T,S_Gauss(:,6));
+hold on
+plot(T_Gauss/T, thmean);
+xlabel('Time [T]') 
+ylabel('$\theta_{J2}$ (rad)','Interpreter','Latex')
+legend('Gauss','average')
+title('true anomaly J2');
+
+%% both plots
+[ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E, initial_date, AMR, Cr, 2), mu_E), tspan_pert, kep0, options );
+
+% Semi-Major Axis, a
+figure
+N = 100;
+amean = movmean(S_Gauss(:, 1), N);
+hold on;
+plot(T_Gauss/T,S_Gauss(:,1));
+plot(T_Gauss/T, amean);
+legend('Gauss','average');
+xlabel('Time [T]') 
+ylabel('$a_{J2}$ (km)','Interpreter','Latex')
+title('semi-major axis J2');
+
+% Eccentricity, e
+figure;
+N = 100;
+emean = movmean(S_Gauss(:, 2), N);
+emean2 = movmean(S_Gauss(:,2),1000000);
+plot(T_Gauss/T,S_Gauss(:,2));
+title('eccentricity');
+hold on
+plot(T_Gauss/T, emean);
+plot(T_Gauss/T, emean2)
+legend('Gauss','short-term average', 'secular average')
+xlabel('Time [T]') 
+ylabel('$e_{J2}$','Interpreter','Latex')
+title('eccentricity J2');
+
+% Inclination, i
+figure;
+N = 100;
+imean = movmean(S_Gauss(:, 3), N);
+plot(T_Gauss/T,S_Gauss(:,3));
+hold on
+plot(T_Gauss/T, imean);
+xlabel('Time [T]') 
+ylabel('$i_{J2}$ (rad)','Interpreter','Latex')
+title('inclination J2');
+legend('Gauss','average')
+
+% Right Ascension of the Ascending Node, OM
+figure;
+N = 100;
+OMmean = movmean(S_Gauss(:, 4), N);
+plot(T_Gauss/T,S_Gauss(:,4));
+hold on
+plot(T_Gauss/T, OMmean);
+legend('Gauss','average')
+xlabel('Time [T]') 
+ylabel('$\Omega_{J2}$ (rad)','Interpreter','Latex')
+title('Right Ascension of the Ascending Node J2');
+
+% Argument of pericenter, om
+figure;
+N = 100;
+ommean = movmean(S_Gauss(:, 5), N);
+plot(T_Gauss/T,S_Gauss(:,5));
+hold on
+plot(T_Gauss/T, ommean);
+legend('Gauss','average')
+xlabel('Time [T]') 
+ylabel('$\omega_{J2}$ (rad)','Interpreter','Latex')
+title('argument of pericenter J2');
+
+% True Anomaly, theta
+figure;
+S_Gauss(:, 6) = wrapToPi(S_Gauss(:,6));
+N = 100;
+thmean = movmean(S_Gauss(:, 6), N);
+plot(T_Gauss/T,S_Gauss(:,6));
+hold on
+plot(T_Gauss/T, thmean);
+xlabel('Time [T]') 
+ylabel('$\theta_{J2}$ (rad)','Interpreter','Latex')
+legend('Gauss','average')
+title('true anomaly J2');
 %% point 7 - Comparison with real data
 
 sc_ephemeris=load("056B_3y_matrix.mat");
