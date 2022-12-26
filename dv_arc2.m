@@ -1,4 +1,4 @@
-function [dv_tot,VI,t1,dt] = dv_arc2(t1, t2, car_1, kep_2, mu)
+function [dv_tot,VI,dt,TPAR] = dv_arc2(t1, t2, car_1, kep_2, mu)
 % [dv_tot,t1,dt] = dv_calc(t1, t2, p1, p2, mu)
 % This function calculates the total delta-v required for a spacecraft to go
 % from one planet to another in a given time period.

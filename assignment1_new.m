@@ -18,9 +18,13 @@ m_E=mu_E/G;
 % data
 dept1=[2028,01,30,0,0,0]; %GIVEN
 arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
+% unused
+
 rp_min=R_E*21 * 1.2;
 
-% synodic period
+%% time windows
+
+%synodic period
 a_Saturn=9.5826*AU;
 T_Saturn = 2*pi*sqrt( a_Saturn^3/mu_S ); % Orbital period [1/s]
 a_Earth=AU;
@@ -37,6 +41,7 @@ Tsyn_ES=T_Saturn*T_Earth/(abs(T_Saturn-T_Earth));
 [kepNEO_arr,~,~] = ephNEO(0,86);
 T_NEO=2*pi*sqrt( (kepNEO_arr(1))^3/mu_S ); % Orbital period [1/s]
 Tsyn_SN=T_Saturn*T_NEO/(abs(T_Saturn-T_NEO));
+Tsyn_SN/3600/24/365.25
 % GA_window_2_mjd2000 = date2mjd2000(GA_window_2)+10*Tsyn_SN/3600/24;
 %arrt1=mjd20002date(dept2_mjd2000); %%THIS WAS GIVING US AN ERROR
 
@@ -47,26 +52,43 @@ N_synodic_T=5;
 dept2_mjd2000 = date2mjd2000(dept1)+N_synodic_T*Tsyn_ES/3600/24;
 dept2=mjd20002date(dept2_mjd2000);
 
-ToF1_min = 7; %years
+
+% Hohmann
+a_hohmann=(AU+1.427*10^9)/2
+t_hohmann=pi*sqrt(a_hohmann^3/mu_S)
+t_hohmann/3600/24/365
+
+ToF1_min = 6.2; %years
 ToF1_max = 10; %years
 
 GA_window_1=dept1 + [ToF1_min, 0, 0 ,0 ,0, 0]; %assumption for fly-by window
 GA_window_2=dept2 + [ToF1_max, 0, 0 ,0 ,0, 0]; %assumption for fly-by window
+% GA_window_2=dept2 + [ToF1_max, 0, 0 ,0 ,0, 0]; %assumption for fly-by window
 
-ToF2_min = (1.2*Tsyn_SN)/3600/24;
-ToF2_max = (2.3*Tsyn_SN)/3600/24;
+
+% ToF2_min = (1.2*Tsyn_SN)/3600/24; % was 1.2
+% ToF2_min_years=ToF2_min/365
+% ToF2_max = (3*Tsyn_SN)/3600/24;
+% ToF2_max_years=ToF2_max/365
+
+ToF2_min=5*365; % years to days
+ToF2_max = 14*365;
 
 arrt1 = mjd20002date(date2mjd2000(GA_window_1)+ToF2_min); %First possible arrival time at the asteroid
 arrt2 = mjd20002date(date2mjd2000(GA_window_2)+ToF2_max);
 %arrt2 = GA_window_2 + [10, 0, 0 ,0 ,0, 0];
 
-% theta_parabolic=2/3*pi;
-% p_parabolic=100;
+% % hypothetic interplanetary parabola with p on the orbit of Earth
+% % (increased by a certain factor) and intersecting the orbit of Saturn at
+% % theta_parabolic
+% p_parabolic=a_Earth*1.3
+% theta_parabolic=acos(2*p_parabolic/a_Saturn-1);
+% th_deg=theta_parabolic*180/pi
 % D=tan(theta_parabolic/2);
 % M=1/2*(D+D^3/3);
 % n_parabolic=sqrt(mu_S/p_parabolic^3);
-% t_parabolic=M/n_parabolic;
-% dept2_mjd2000 = date2mjd2000(dept1)
+% t_parabolic=M/n_parabolic
+% t_parabolic/3600/24
 
 
 %conversion to Modern Julian Date 2000
@@ -85,16 +107,16 @@ tspan_GA=linspace(t_GA_window_1, t_GA_window_2, 100); % fly-by window
 p1=3; %Earth
 p2=6; %Saturn
 
-
+%% grid search
 for i=1:length(tspan_dept)
     i
     for j=1:length(tspan_GA)       
-        [dv_1(i,j),V_SC_Saturn_1,V_Saturn, r_Saturn, t1(i,j),ToF1] = dv_arc1(tspan_dept(i), tspan_GA(j), p1, p2, mu_S);        
+        [dv_1(i,j),V_SC_Saturn_1,V_Saturn, r_Saturn,ToF1(i,j),tpar1(i,j)] = dv_arc1(tspan_dept(i), tspan_GA(j), p1, p2, mu_S);        
         % dv_1 manoeuver at Earth
         V_per_min(i,j,:)=V_SC_Saturn_1;
         for k=1:length(tspan_arrt)             
             [kepNEO_arr,~,~] = ephNEO(tspan_arrt(k),86);
-            [dv_2(i,j,k),V_SC_Saturn_2, t2(i,j,k),ToF2] = dv_arc2(tspan_GA(j), tspan_arrt(k), r_Saturn, kepNEO_arr, mu_S);
+            [dv_2(i,j,k),V_SC_Saturn_2,ToF2(i,j,k),tpar2(i,j,k)] = dv_arc2(tspan_GA(j), tspan_arrt(k), r_Saturn, kepNEO_arr, mu_S);
             [rp(i,j,k), Delta_vp(i,j,k),vp_minus(i,j,k),vp_plus(i,j,k),v_inf_minus(i,j,k,:),v_inf_plus(i,j,k,:)] = PGA (V_Saturn, V_SC_Saturn_1',V_SC_Saturn_2', rp_min,mu_Saturn);
             V_per_plus(i,j,k,:) = V_SC_Saturn_2;
             %[rp, Delta_vp] = PGA (V_P,V_minus,V_plus,rp_min,mu_E)
@@ -109,6 +131,20 @@ m3=min(min(min(dv_tot)));
 
 % [x,y,z]=find(dv_tot==m3);
 [x,y,z] = ind2sub(size(dv_tot),find(dv_tot==m3));
+
+
+%% mission results
+dv_1(x,y)
+dv_2(x,y,z)
+Delta_vp(x,y,z)
+optimal_departure_time=mjd20002date(t_dept1+ToF1(x,y)/3600/24)
+% optimal_fly_by_time=mjd20002date(t_GA_window_1+t2(x,y,z))
+% % optimal_arrival_time=mjd20002date(t_arrt1-t2(x,y,z))
+ToF1(x,y)/3600/24/365 % ??????? more than the max value??
+ToF2(x,y,z)/3600/24/365
+
+% tpar1(x,y)/3600/24
+% tpar2(x,y,z)/3600/24/365
 
 %% Optimal solution - Fly-By time
 T=3600*24*2;
@@ -166,7 +202,7 @@ hold on
 [X, Y] = meshgrid(tspan_GA, tspan_arrt);
 Z = dv_porkchop(X, Y, p2,86, @dv_arcNEO,mu_S);
 
-V=5:30;
+V=4:30;
 contour(X./365.25 +2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
 colorbar
 xlabel('Departure time [years]');
@@ -175,22 +211,34 @@ title('Transfer to Asteroid Porkchop plot');
 hold on;
 scatter(tspan_GA(y)/365.25+2000,tspan_arrt(z)/365.25+2000,20,'red','filled');
 
-%% cost plot ????
-% tspan_1=linspace(t_dept1,t_GA_window_2, 1000);
-% tspan_2=linspace(t_GA_window_2,t_arrt2, 1000);
-
-% [X, Y] = meshgrid(tspan_1, tspan_2);
-[X, Y] = meshgrid(tspan_dept, tspan_arrt);
-Z = dv_porkchop(X, Y, p1, p2, mu_S);
-
-V=10:2:40;
-contour(X./365.25 +2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
-colorbar
-xlabel('Departure time [years]');
-ylabel('Arrival time [years]');
-title('Cost plot');
-hold on;
-scatter(tspan_dept(x)/365.25+2000,tspan_arrt(z)/365.25+2000,20,'red','filled');
+% %% cost plot ????
+% clc
+% NEO=86;
+% % tspan_1=linspace(t_dept1,t_GA_window_2, 1000);
+% % tspan_2=linspace(t_GA_window_2,t_arrt2, 1000);
+% 
+% % [X, Y] = meshgrid(tspan_1, tspan_2);
+% 
+% % [X, Y] = meshgrid(tspan_dept, tspan_arrt);
+%         % Saturn    
+%         [X1, Y1_GA] = meshgrid(tspan_dept, tspan_GA);
+%         % Z = dv_porkchop(X, Y, p1, p2, @dv_arc1,mu_S);
+% 
+%         % Asteroid
+%         [X2_GA, Y2] = meshgrid(tspan_GA, tspan_arrt);
+%         % Z = dv_porkchop(X, Y, p2,86, @dv_arcNEO,mu_S);
+% [Z,X,Y] = dv_totalcost(X1, Y1_GA,X2_GA,Y2, p1, p2,NEO, mu_S);
+% % function Z = dv_totalcost(X1, Y1_GA,X2_GA,Y2, p1, p2,NEO,mu)
+% % X=[X1,X2_GA]
+% % Y=[Y1_GA;Y2]
+% V=10:2:40;
+% contour(X./365.25 +2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
+% colorbar
+% xlabel('Departure time [years]');
+% ylabel('Arrival time [years]');
+% title('Cost plot');
+% hold on;
+% % scatter(tspan_dept(x)/365.25+2000,tspan_arrt(z)/365.25+2000,20,'red','filled');
 
 %% Plot the planetocentric hyperbolic arcs:
 earth_sphere

@@ -22,7 +22,7 @@ a_minus=rp/(1-ecc_minus(rp));
 a_plus=rp/(1-ecc_plus(rp));
 vp_minus=sqrt(2*mu*(1/rp-1/(2*a_minus)));
 vp_plus=sqrt(2*mu*(1/rp-1/(2*a_plus)));
-Delta_vp=vp_plus-vp_minus;
+Delta_vp=abs(vp_plus-vp_minus);
 
 if rp < rp_min || isnan(rp)
     Delta_vp=NaN;

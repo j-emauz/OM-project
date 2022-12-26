@@ -1,4 +1,4 @@
-function [dv_tot,VF,v_2, car_2,t1,dt] = dv_arc1(t1, t2, p1, p2, mu)
+function [dv_tot,VF,v_2, car_2,dt,TPAR] = dv_arc1(t1, t2, p1, p2, mu)
 
 dt = t2 - t1;
 dt = dt*24*3600;
