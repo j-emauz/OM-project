@@ -576,24 +576,28 @@ legend('Gauss','average')
 %title('true anomaly J2+SRP');
 %% point 7 - Comparison with real data
 
-sc_ephemeris=load("056B_3y_matrix.mat");
+sc_ephemeris=load("056B_2hours_matrix.mat"); %use this for graphs? takes a
+%while though
+% sc_ephemeris=load("056B_3y_matrix.mat");
 
-%e=sc_ephemeris.B2hours.EC;
-% a=sc_ephemeris.B2hours.A;
-% i=sc_ephemeris.B2hours.IN.*pi/180;
-% OM=wrapToPi(sc_ephemeris.B2hours.OM.*pi/180);
-% om=wrapToPi(sc_ephemeris.B2hours.W.*pi/180);
-% theta=wrapToPi(sc_ephemeris.B2hours.TA.*pi/180);
-% date=sc_ephemeris.B2hours.CalendarDateTDB; %date
 
-e=sc_ephemeris.B3y.EC;
-a=sc_ephemeris.B3y.A;
-i=sc_ephemeris.B3y.IN.*pi/180;
-OM=wrapToPi(sc_ephemeris.B3y.OM.*pi/180);
-om=wrapToPi(sc_ephemeris.B3y.W.*pi/180);
-theta=wrapToPi(sc_ephemeris.B3y.TA.*pi/180);
-date=sc_ephemeris.B3y.CalendarDateTDB; %date
+e=sc_ephemeris.B2hours.EC;
+a=sc_ephemeris.B2hours.A;
+i=sc_ephemeris.B2hours.IN.*pi/180;
+OM=wrapToPi(sc_ephemeris.B2hours.OM.*pi/180);
+om=wrapToPi(sc_ephemeris.B2hours.W.*pi/180);
+theta=wrapToPi(sc_ephemeris.B2hours.TA.*pi/180);
+date=sc_ephemeris.B2hours.CalendarDateTDB; %date
 date0=date(1);
+
+% e=sc_ephemeris.B3y.EC;
+% a=sc_ephemeris.B3y.A;
+% i=sc_ephemeris.B3y.IN.*pi/180;
+% OM=wrapToPi(sc_ephemeris.B3y.OM.*pi/180);
+% om=wrapToPi(sc_ephemeris.B3y.W.*pi/180);
+% theta=wrapToPi(sc_ephemeris.B3y.TA.*pi/180);
+% date=sc_ephemeris.B3y.CalendarDateTDB; %date
+% date0=date(1);
 
 kep0_sc=[a(1),e(1),i(1),OM(1),om(1),theta(1)];
 
@@ -602,9 +606,10 @@ t0=date2mjd2000(date_0);
 date_final=[2023,1,19,0,0,0];
 t_final=date2mjd2000(date_final);
 
-%t_span_sc=t0*24*3600:2*3600:t_final*24*3600;
-t_span_sc=t0*24*3600:24*3600:t_final*24*3600;
-
+t_span_sc=t0*24*3600:2*3600:t_final*24*3600; %Time span for 2hour time
+%step
+% t_span_sc=t0*24*3600:24*3600:t_final*24*3600; %time span for day time step
+%%
 for j=1:length(e)
     [rr_sc_ephemeris(:,j), vv_sc_ephemeris(:,j)] = par2car(a(j), e(j), i(j), OM(j), om(j), theta(j), mu_E);
 end
@@ -616,83 +621,72 @@ hold off
 
 %% 7.c
 close all
-AMR = 0.1;
+AMR = 0.35; 
 Cr = 1;
-T_sc = 2*pi*sqrt( kep0_sc(1)^3/mu_E )/3600; 
-% tspan_pert = linspace( 0, 100*T_sc, 10000 );
+T_sc = 2*pi*sqrt( kep0_sc(1)^3/mu_E ); 
+
+options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14);
 [ T_sc_Gauss, S_sc_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E, date_0, AMR, Cr, 2), mu_E), t_span_sc, kep0_sc, options );
-%[rr, vv] = par2car(kep0_sc(1), kep0_sc(2), kep0_sc(3), kep0_sc(4), kep0_sc(5), kep0_sc(6), mu_E);
-%kep0_sc = [rr; vv];
-%[ T_sc_Gauss, S_sc_Gauss ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E,J2, R_E, date_0, AMR, Cr, 2), t_span_sc, kep0_sc, options );
-% Semi-Major Axis, a
-% N = 100;
-% amean = movmean(S_Gauss(:, 1), N);
-% plot(T_sc_Gauss/T_sc, amean);
 %% a
 figure;
 hold on;
 plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,1));
 plot(T_sc_Gauss/T_sc,a);
-
+xlabel('Time [T]') 
+ylabel('$a$ (km)','Interpreter','Latex')
 legend('Gauss','Ephemerides');
-title('semi-major axis');
+fontsize(gca, scale=1.5)
 hold off
 
 
 %% Eccentricity, e
 figure;
-% N = 500;
-% emean = movmean(S_Gauss(:, 2), N);
 plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,2));
-title('eccentricity');
 hold on
 plot(T_sc_Gauss/T_sc,e);
-% plot(T_Gauss/T, emean);
 legend('Gauss','Ephemeris')
+xlabel('Time [T]') 
+ylabel('$e$','Interpreter','Latex')
+fontsize(gca, scale=1.5)
 
 %% Inclination, i
 figure;
-% N = 500;
-% imean = movmean(S_Gauss(:, 3), N);
 plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,3));
 hold on
 plot(T_sc_Gauss/T_sc,i);
-% plot(T_Gauss/T, imean);
-title('inclination');
 legend('Gauss','Ephemeris')
+xlabel('Time [T]') 
+ylabel('$i$ (rad)','Interpreter','Latex')
+fontsize(gca, scale=1.5)
 
 %% Right Ascension of the Ascending Node, OM
 figure;
-% N = 500;
-% OMmean = movmean(S_Gauss(:, 4), N);
 plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,4));
 hold on
 plot(T_sc_Gauss/T_sc,OM);
-% plot(T_Gauss/T, OMmean);
 legend('Gauss','Ephemeris')
-title('Right Ascension of the Ascending Node');
+xlabel('Time [T]') 
+ylabel('$\Omega$ (rad)','Interpreter','Latex')
+fontsize(gca, scale=1.5)
 
 %% Argument of pericenter, om
 figure;
-% N = 500;
-% ommean = movmean(S_Gauss(:, 5), N);
 plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,5));
 hold on
 plot(T_sc_Gauss/T_sc,om);
-% plot(T_sc_Gauss/T_sc, ommean);
 legend('Gauss','Ephemeris')
-title('argument of pericenter');
-
+xlabel('Time [T]') 
+ylabel('$\omega$ (rad)','Interpreter','Latex')
+fontsize(gca, scale=1.5)
 
 
 %% True Anomaly, theta
 figure;
-S_sc_Gauss(:, 6) = wrapTo2Pi(S_sc_Gauss(:,6));
-% N = 500;
-% thmean = movmean(S_Gauss(:, 6), N);
+S_sc_Gauss(:, 6) = wrapToPi(S_sc_Gauss(:,6));
 plot(T_sc_Gauss/T_sc,S_sc_Gauss(:,6));
 hold on
 plot(T_sc_Gauss/T_sc,theta);
-% plot(T_sc_Gauss/T, thmean);
 legend('Gauss','Ephemeris')
-title('true anomaly');
+xlabel('Time [T]') 
+ylabel('$\theta$ (rad)','Interpreter','Latex')
+fontsize(gca, scale=1.5)
