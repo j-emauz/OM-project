@@ -16,13 +16,13 @@ m_Sun=mu_S/G;
 m_E=mu_E/G;
 
 % data
-dept1=[2028,01,30,0,0,0]; %GIVEN
+dept1=[2035,01,30,0,0,0]; %GIVEN
 arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
 % unused
 
-rp_min=R_E*21*1.2;
+% rp_min=R_E*21*1.2;
 % rp_min=480000*2.1
-% rp_min=5.44*10^6;
+rp_min=R_E*21;
 %% time windows
 
 %synodic period
@@ -42,7 +42,6 @@ Tsyn_ES=T_Saturn*T_Earth/(abs(T_Saturn-T_Earth));
 [kepNEO_arr,~,~] = ephNEO(0,86);
 T_NEO=2*pi*sqrt( (kepNEO_arr(1))^3/mu_S ); % Orbital period [1/s]
 Tsyn_SN=T_Saturn*T_NEO/(abs(T_Saturn-T_NEO));
-Tsyn_SN/3600/24/365.25
 % GA_window_2_mjd2000 = date2mjd2000(GA_window_2)+10*Tsyn_SN/3600/24;
 %arrt1=mjd20002date(dept2_mjd2000); %%THIS WAS GIVING US AN ERROR
 
@@ -55,9 +54,9 @@ dept2=mjd20002date(dept2_mjd2000);
 
 
 % Hohmann
-a_hohmann=(AU+1.427*10^9)/2
-t_hohmann=pi*sqrt(a_hohmann^3/mu_S)
-t_hohmann/3600/24/365.25
+a_hohmann=(AU+1.427*10^9)/2;
+t_hohmann=pi*sqrt(a_hohmann^3/mu_S);
+t_hohmann/3600/24/365.25;
 
 ToF1_min = 6.2; %years
 ToF1_max = 10; %years
@@ -72,7 +71,7 @@ GA_window_2=dept2 + [ToF1_max, 0, 0 ,0 ,0, 0]; %assumption for fly-by window
 % ToF2_max = (3*Tsyn_SN)/3600/24;
 % ToF2_max_years=ToF2_max/365
 
-ToF2_min=5; % years to days
+ToF2_min=7; % years to days
 ToF2_max = 14;
 
 arrt1 = mjd20002date(date2mjd2000(GA_window_1)+ToF2_min); %First possible arrival time at the asteroid
@@ -138,7 +137,7 @@ m3=min(min(min(dv_tot)));
 % [x,y,z]=find(dv_tot==m3);
 [x,y,z] = ind2sub(size(dv_tot),find(dv_tot==m3));
 
-rp(x,y,z)
+rp_opt=rp(x,y,z);
 %% mission results
 dv_1(x,y)
 dv_2(x,y,z)
@@ -147,8 +146,8 @@ optimal_departure=mjd20002date(tspan_dept(x))
 optimal_Saturn_arrival=mjd20002date(tspan_dept(x)+ToF1_vect(y))
 optimal_NEO_arrival=mjd20002date(tspan_dept(x)+ToF1_vect(y)+ToF2_vect(z))
 
-ToF1_vect(y)/365.25
-ToF2_vect(z)/365.25
+% ToF1_vect(y)/365.25
+% ToF2_vect(z)/365.25
 
 
 % tpar1(x,y)/3600/24
@@ -168,7 +167,7 @@ a_plus=rp(x,y,z)/(1-ecc_plus);
 r_SOI= a_Saturn*(m_Saturn/m_Sun)^(2/5);
 theta_minus= acos((1/ecc_minus)*((a_minus*(1-ecc_minus^2)/r_SOI)-1));
 E_minus=2*atanh(sqrt((ecc_minus-1)/(1+ecc_minus)*tan(theta_minus/2)));
-E_minus*180/pi
+
 theta_plus= acos((1/ecc_plus)*((a_plus*(1-ecc_plus^2)/r_SOI)-1));
 E_plus=2*atanh(sqrt((ecc_plus-1)/(1+ecc_plus)*tan(theta_plus/2)));
 
@@ -334,7 +333,7 @@ legend('','Transfer arc 1','Sun','Saturn','Transfer arc 2','Saturn orbit','Earth
 %Saturn orbit:
 T=2*pi*sqrt(kep_1(1)^3/mu_S);
 tspan = linspace( 0, T,1000);
-y0_Saturn = [r0_Saturn,v0];
+y0_Saturn = [r0_Saturn,v0_Saturn];
      % Set options for the ODE solver
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
 [ t, Y_saturn ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0_Saturn, options );
