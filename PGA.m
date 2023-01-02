@@ -16,7 +16,7 @@ delta=acos(dot(v_inf_minus,v_inf_plus)/(norm(v_inf_minus)*norm(v_inf_plus)));
     delta_fun=@(rp) delta_minus(rp)/2 + delta_plus(rp)/2;
     fun=@(rp) delta-delta_fun(rp);
     
-rp=fzero(fun,rp_min, options);
+rp=fzero(fun,[rp_min, 10^10], options);
 
 a_minus=rp/(1-ecc_minus(rp));
 a_plus=rp/(1-ecc_plus(rp));
