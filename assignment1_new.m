@@ -21,7 +21,7 @@ arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
 % unused
 
 rp_min=R_E*21 * 1.2;
-
+rp_min=5.44*10^6;
 %% time windows
 
 %synodic period
@@ -56,7 +56,7 @@ dept2=mjd20002date(dept2_mjd2000);
 % Hohmann
 a_hohmann=(AU+1.427*10^9)/2
 t_hohmann=pi*sqrt(a_hohmann^3/mu_S)
-t_hohmann/3600/24/365
+t_hohmann/3600/24/365.25
 
 ToF1_min = 6.2; %years
 ToF1_max = 10; %years
@@ -71,8 +71,8 @@ GA_window_2=dept2 + [ToF1_max, 0, 0 ,0 ,0, 0]; %assumption for fly-by window
 % ToF2_max = (3*Tsyn_SN)/3600/24;
 % ToF2_max_years=ToF2_max/365
 
-ToF2_min=5*365; % years to days
-ToF2_max = 14*365;
+ToF2_min=5; % years to days
+ToF2_max = 14;
 
 arrt1 = mjd20002date(date2mjd2000(GA_window_1)+ToF2_min); %First possible arrival time at the asteroid
 arrt2 = mjd20002date(date2mjd2000(GA_window_2)+ToF2_max);
@@ -108,15 +108,20 @@ p1=3; %Earth
 p2=6; %Saturn
 
 %% grid search
+ToF1_vect=linspace(ToF1_min*365.25,ToF1_max*365.25,100);
+ToF2_vect=linspace(ToF2_min*365.25,ToF2_max*365.25,100);
 for i=1:length(tspan_dept)
     i
-    for j=1:length(tspan_GA)       
-        [dv_1(i,j),V_SC_Saturn_1,V_Saturn, r_Saturn,ToF1(i,j),tpar1(i,j)] = dv_arc1(tspan_dept(i), tspan_GA(j), p1, p2, mu_S);        
+%     tGA=tspan_dept(i)+ToF1_max;
+%     for j=1:length(tspan_GA)       
+        for j=1:length(ToF1_vect)
+        [dv_1(i,j),V_SC_Saturn_1,V_Saturn, r_Saturn,ToF1(i,j),tpar1(i,j)] = dv_arc1(tspan_dept(i), tspan_dept(i)+ToF1_vect(j), p1, p2, mu_S);        
         % dv_1 manoeuver at Earth
-        V_per_min(i,j,:)=V_SC_Saturn_1;
-        for k=1:length(tspan_arrt)             
-            [kepNEO_arr,~,~] = ephNEO(tspan_arrt(k),86);
-            [dv_2(i,j,k),V_SC_Saturn_2,ToF2(i,j,k),tpar2(i,j,k)] = dv_arc2(tspan_GA(j), tspan_arrt(k), r_Saturn, kepNEO_arr, mu_S);
+        V_per_min(i,j,:)=V_SC_Saturn_1;       
+        for k=1:length(ToF2_vect)
+        %for k=1:length(tspan_arrt)             
+            [kepNEO_arr,~,~] = ephNEO(tspan_dept(i)+ToF1_vect(j)+ToF2_vect(k),86);
+            [dv_2(i,j,k),V_SC_Saturn_2,ToF2(i,j,k),tpar2(i,j,k)] = dv_arc2(tspan_dept(i)+ToF1_vect(j), tspan_dept(i)+ToF1_vect(j)+ToF2_vect(k), r_Saturn, kepNEO_arr, mu_S);
             [rp(i,j,k), Delta_vp(i,j,k),vp_minus(i,j,k),vp_plus(i,j,k),v_inf_minus(i,j,k,:),v_inf_plus(i,j,k,:)] = PGA (V_Saturn, V_SC_Saturn_1',V_SC_Saturn_2', rp_min,mu_Saturn);
             V_per_plus(i,j,k,:) = V_SC_Saturn_2;
             %[rp, Delta_vp] = PGA (V_P,V_minus,V_plus,rp_min,mu_E)
@@ -132,16 +137,18 @@ m3=min(min(min(dv_tot)));
 % [x,y,z]=find(dv_tot==m3);
 [x,y,z] = ind2sub(size(dv_tot),find(dv_tot==m3));
 
-
+rp(x,y,z)
 %% mission results
 dv_1(x,y)
 dv_2(x,y,z)
 Delta_vp(x,y,z)
-optimal_departure_time=mjd20002date(t_dept1+ToF1(x,y)/3600/24)
-% optimal_fly_by_time=mjd20002date(t_GA_window_1+t2(x,y,z))
-% % optimal_arrival_time=mjd20002date(t_arrt1-t2(x,y,z))
-ToF1(x,y)/3600/24/365 % ??????? more than the max value??
-ToF2(x,y,z)/3600/24/365
+optimal_departure=mjd20002date(tspan_dept(x))
+optimal_Saturn_arrival=mjd20002date(tspan_dept(x)+ToF1_vect(y))
+optimal_NEO_arrival=mjd20002date(tspan_dept(x)+ToF1_vect(y)+ToF2_vect(z))
+
+ToF1_vect(y)/365.25
+ToF2_vect(z)/365.25
+
 
 % tpar1(x,y)/3600/24
 % tpar2(x,y,z)/3600/24/365
@@ -150,7 +157,7 @@ ToF2(x,y,z)/3600/24/365
 T=3600*24*2;
 
 v_inf_min=squeeze(v_inf_minus(x,y,z,:));
-v_inf_pl=squeeze(v_inf_plus(x,y,z));
+v_inf_pl=squeeze(v_inf_plus(x,y,z,:));
 ecc_minus= 1+(rp(x,y,z)*(norm(v_inf_min)^2)/mu_Saturn);
 ecc_plus=1+(rp(x,y,z)*(norm(v_inf_pl)^2)/mu_Saturn);
 a_minus=rp(x,y,z)/(1-ecc_minus);
@@ -160,6 +167,7 @@ a_plus=rp(x,y,z)/(1-ecc_plus);
 r_SOI= a_Saturn*(m_Saturn/m_Sun)^(2/5);
 theta_minus= acos((1/ecc_minus)*((a_minus*(1-ecc_minus^2)/r_SOI)-1));
 E_minus=2*atanh(sqrt((ecc_minus-1)/(1+ecc_minus)*tan(theta_minus/2)));
+E_minus*180/pi
 theta_plus= acos((1/ecc_plus)*((a_plus*(1-ecc_plus^2)/r_SOI)-1));
 E_plus=2*atanh(sqrt((ecc_plus-1)/(1+ecc_plus)*tan(theta_plus/2)));
 
@@ -186,7 +194,7 @@ xlabel('Departure time [years]');
 ylabel('Arrival time [years]');
 title('Transfer to Saturn Porkchop plot');
 hold on;
-scatter(tspan_dept(x)/365.25+2000,tspan_GA(y)/365.25+2000,20,'red','filled');
+scatter(tspan_dept(x)/365.25+2000,(tspan_dept(x)+ToF1_vect(y))/365.25+2000,20,'red','filled');
 
 figure
 grid off
@@ -209,7 +217,7 @@ xlabel('Departure time [years]');
 ylabel('Arrival time [years]');
 title('Transfer to Asteroid Porkchop plot');
 hold on;
-scatter(tspan_GA(y)/365.25+2000,tspan_arrt(z)/365.25+2000,20,'red','filled');
+scatter((tspan_dept(x)+ToF1_vect(y))/365.25+2000,(tspan_dept(x)+ToF1_vect(y)+ToF2_vect(z))/365.25+2000,20,'red','filled');
 
 % %% cost plot ????
 % clc
