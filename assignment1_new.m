@@ -20,9 +20,9 @@ dept1=[2028,01,30,0,0,0]; %GIVEN
 arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
 % unused
 
-rp_min=R_E*21 * 1.2;
-rp_min=480000*2.1
-rp_min=5.44*10^6;
+rp_min=R_E*21*1.2;
+% rp_min=480000*2.1
+% rp_min=5.44*10^6;
 %% time windows
 
 %synodic period
@@ -290,18 +290,15 @@ scatter3(0,0,0,80,'red','filled');
 legend('','Hyperbola entry leg', 'Hyperbola exit leg','Entry Asymptote', 'Exit Asymptote','','Saturn');
 %% heliocentric plot
 
-tspan_dept(x)+ToF1_vect(y)
-tspan_dept(x)+ToF1_vect(y)+ToF2_vect(z)
-
 figure()
 earth_sphere('AU')
 hold on
 %Plotting of 1st transfer arc
 [kep_1,~] = uplanet(tspan_dept(x)+ToF1_vect(y),p2);
-[r0,v0] = par2car(kep_1(1),kep_1(2),kep_1(3),kep_1(4),kep_1(5),kep_1(6),mu_S);
+[r0_Saturn,v0_Saturn] = par2car(kep_1(1),kep_1(2),kep_1(3),kep_1(4),kep_1(5),kep_1(6),mu_S);
 V_minus = squeeze(V_per_min(x,y,:));
 % V_minus = V_per_min;
-y0=[r0;V_minus];
+y0_SC_saturn=[r0_Saturn;V_minus];
 % T=3600*24*365*5;
 % % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 
@@ -310,64 +307,66 @@ tspan = linspace( 0, -(ToF1_vect(y))*24*3600,1000);
 
      % Set options for the ODE solver
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-[ t, Y_helio_before ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+
+%Heliocentric transfer arc before FlyBy:
+[ t, Y_helio_before ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0_SC_saturn, options );
 plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, '-','LineWidth',2);
 hold on
 grid on
 %Sun sphere
 scatter3(0, 0 ,0 ,100, 'yellow', 'filled');
 %Saturn sphere
-scatter3(r0(1)/AU,r0(2)/AU,r0(3)/AU,20,'red','filled');
+scatter3(r0_Saturn(1)/AU,r0_Saturn(2)/AU,r0_Saturn(3)/AU,20,'red','filled');
 
-%Plotting of the 2nd transfer arc
+%Plotting of the 2nd transfer arc:
 V_plus = squeeze(V_per_plus(x,y,z,:));
-y0=[r0;V_plus];
+y0_SC_saturn_plus=[r0_Saturn;V_plus];
 % T=2*pi*sqrt( a^3/mu_E ); % Orbital period [1/s]
 tspan = linspace( 0, (ToF2_vect(z))*24*3600,1000);
      % Set options for the ODE solver
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-[ t, Y_helio_before ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
-plot3( Y_helio_before(:,1)/AU, Y_helio_before(:,2)/AU, Y_helio_before(:,3)/AU, 'r-','LineWidth',2);
+[ t, Y_helio_after ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0_SC_saturn_plus, options );
+plot3( Y_helio_after(:,1)/AU, Y_helio_after(:,2)/AU, Y_helio_after(:,3)/AU, 'r-','LineWidth',2);
 legend('','Transfer arc 1','Sun','Saturn','Transfer arc 2','Saturn orbit','Earth orbit','Earth','Asteroid orbit','Asteroid');
 
 %Plotting of objects orbits
 
-%Saturn orbit
+%Saturn orbit:
 T=2*pi*sqrt(kep_1(1)^3/mu_S);
 tspan = linspace( 0, T,1000);
-y0 = [r0_Saturn,v0];
+y0_Saturn = [r0_Saturn,v0];
      % Set options for the ODE solver
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-[ t, Y_saturn ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+[ t, Y_saturn ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0_Saturn, options );
 plot3( Y_saturn(:,1)/AU, Y_saturn(:,2)/AU, Y_saturn(:,3)/AU, 'r--','LineWidth',2);
 
 %Earth orbit
 [kep_2,~] = uplanet(tspan_dept(x),p1); %Time doesn't matter, because we do it for one period
-[r0,v0] = par2car(kep_2(1),kep_2(2),kep_2(3),kep_2(4),kep_2(5),kep_2(6),mu_S);
-y0 = [r0;v0];
+[r0_Earth,v0_Earth] = par2car(kep_2(1),kep_2(2),kep_2(3),kep_2(4),kep_2(5),kep_2(6),mu_S);
+y0_Earth = [r0_Earth;v0_Earth];
 T=2*pi*sqrt(kep_2(1)^3/mu_S);
 tspan = linspace( 0, T,1000);
      % Set options for the ODE solver
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-[ t, Y_earth ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+[ t, Y_earth ] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0_Earth, options );
 plot3( Y_earth(:,1)/AU, Y_earth(:,2)/AU, Y_earth(:,3)/AU, 'b--','LineWidth',2);
-scatter3(r0(1)/AU,r0(2)/AU,r0(3)/AU,30,'blue','filled');
+scatter3(r0_Earth(1)/AU,r0_Earth(2)/AU,r0_Earth(3)/AU,30,'blue','filled');
 
 %Asteroid orbit
 [kep_3,~] = ephNEO(tspan_dept(x),86); %Time doesn't matter, because we do it for one period
-[r0_NEO,v0] = par2car(kep_3(1),kep_3(2),kep_3(3),kep_3(4),kep_3(5),kep_3(6),mu_S);
-y0 = [r0;v0];
+[r0_NEO,v0_NEO] = par2car(kep_3(1),kep_3(2),kep_3(3),kep_3(4),kep_3(5),kep_3(6),mu_S);
+y0_NEO = [r0_NEO;v0_NEO];
 T=(ToF1_vect(y)+ToF2_vect(z))*24*3600; %Converted to seconds
 tspan = linspace( 0, T,1000);
      % Set options for the ODE solver
 options = odeset( 'RelTol', 1e-14, 'AbsTol', 1e-14 );
-[ t, Y_asteroid] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0, options );
+[ t, Y_asteroid] = ode113( @(t,y) ode_2bp(t,y,mu_S), tspan, y0_NEO, options );
 plot3( Y_asteroid(:,1)/AU, Y_asteroid(:,2)/AU, Y_asteroid(:,3)/AU, 'g--','LineWidth',2);
 %Getting new ephemerides for the scatter
 [kep_3,~] = ephNEO(tspan_dept(x)+ToF1_vect(y)+ToF2_vect(z),86); %Time doesn't matter, because we do it for one period
 [r0,v0] = par2car(kep_3(1),kep_3(2),kep_3(3),kep_3(4),kep_3(5),kep_3(6),mu_S);
 
-scatter3(r0(1)/AU,r0(2)/AU,r0(3)/AU,20,'green','filled');
+scatter3(r0_NEO(1)/AU,r0_NEO(2)/AU,r0_NEO(3)/AU,20,'green','filled');
 
 scatter3(Y_earth(end,1)/AU, Y_earth(end,2)/AU, Y_earth(end,3)/AU, 30, 'filled', 'b') % final point of the Earth motion during transfer
 scatter3(r0_Saturn(1)/AU,r0_Saturn(2)/AU,r0_Saturn(3)/AU,30,'red','filled'); %Saturn position at departure
