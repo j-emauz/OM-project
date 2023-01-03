@@ -146,8 +146,8 @@ optimal_departure=mjd20002date(tspan_dept(x))
 optimal_Saturn_arrival=mjd20002date(tspan_dept(x)+ToF1_vect(y))
 optimal_NEO_arrival=mjd20002date(tspan_dept(x)+ToF1_vect(y)+ToF2_vect(z))
 
-% ToF1_vect(y)/365.25
-% ToF2_vect(z)/365.25
+ToF1_vect(y)/365.25
+ToF2_vect(z)/365.25
 
 
 % tpar1(x,y)/3600/24
@@ -182,7 +182,7 @@ Delta_t_FlyBy_days=Delta_t_FlyBy/3600/24;
 %% Porkchop plot Saturn
 clc
 
-[X, Y] = meshgrid(tspan_dept, tspan_GA);
+[X, Y] = meshgrid(tspan_dept, tspan_dept+ToF1_vect);
 Z = dv_porkchop(X, Y, p1, p2, @dv_arc1,mu_S);
 
 V=1:2:30;
@@ -207,7 +207,7 @@ hold on
 
 %% Porkchop plot asteroid
 
-[X, Y] = meshgrid(tspan_GA, tspan_arrt);
+[X, Y] = meshgrid(tspan_dept+ToF1_vect, tspan_dept+ToF1_vect+ToF2_vect);
 Z = dv_porkchop(X, Y, p2,86, @dv_arcNEO,mu_S);
 
 V=4:30;
