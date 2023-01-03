@@ -196,7 +196,7 @@ xlabel('Departure time [years]');
 ylabel('Arrival time [years]');
 title('Transfer to Saturn Porkchop plot');
 hold on;
-scatter(tspan_dept(x)/365.25+2000,(tspan_dept(x)+ToF1_vect(y))/365.25+2000,20,'red','filled');
+scatter(tspan_dept(x)/365.25+2000,(tspan_dept(x)+ToF1_vect(y))/365.25+2000,25,'red','filled');
 
 figure
 grid off
@@ -222,7 +222,7 @@ xlabel('Departure time [years]');
 ylabel('Arrival time [years]');
 title('Transfer to Asteroid Porkchop plot');
 hold on;
-scatter((tspan_dept(x)+ToF1_vect(y))/365.25+2000,(tspan_dept(x)+ToF1_vect(y)+ToF2_vect(z))/365.25+2000,20,'red','filled');
+scatter((tspan_dept(x)+ToF1_vect(y))/365.25+2000,(tspan_dept(x)+ToF1_vect(y)+ToF2_vect(z))/365.25+2000,25,'red','filled');
 
 % %% cost plot ????
 % clc
