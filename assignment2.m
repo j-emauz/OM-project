@@ -119,7 +119,7 @@ tCPU_Cartesian_start = cputime;
 [ T_J2, S_perturbed ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E, initial_date, AMR, Cr, 2), tspan_pert, y0, options );
 tCPU_Cartesian = cputime - tCPU_Cartesian_start;
 time_computation = toc (t);
-
+%%
 % plotting perturbed orbit (1)
 figure
 earth_sphere
@@ -143,7 +143,7 @@ end
 
 %% Orbit propagation in Keplerian Elements using Gauss' planetary equations:
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14);
-tspan_pert = linspace(0, 1000*T, 300000);
+tspan_pert = linspace(0, 1000*T, 100000);
 
 % computational time
 tCPU_Gauss_start = cputime;
@@ -325,7 +325,7 @@ P_sun=4.5*10^-6; %[N/m^2]
 Cr=1; 
 initial_date=[2022,03,21,12,0,0];
 
-tspan_pert = linspace(0, 1000*T, 100000);
+tspan_pert = linspace(0, 2000*T, 100000);
 options = odeset( 'RelTol', 1e-13, 'AbsTol', 1e-14);
 [ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E, initial_date, AMR, Cr, 0), mu_E), tspan_pert, kep0, options );
 
@@ -407,7 +407,7 @@ legend('Gauss','average')
 %title('true anomaly J2');
 
 %% Just SRP plots
-tspan_pert = linspace(0, 1000*T, 100000);
+tspan_pert = linspace(0, 2000*T, 100000);
 [ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E, initial_date, AMR, Cr, 1), mu_E), tspan_pert, kep0, options );
 
 % Semi-Major Axis, a
@@ -426,7 +426,7 @@ ylabel('$a_{SRP}$ (km)','Interpreter','Latex')
 figure;
 N = 100;
 emean = movmean(S_Gauss(:, 2), N);
-emean2 = movmean(S_Gauss(:,2));
+emean2 = movmean(S_Gauss(:,2),1000000);
 plot(T_Gauss/T,S_Gauss(:,2));
 %title('eccentricity');
 hold on
@@ -493,7 +493,7 @@ legend('Gauss','average')
 %title('true anomaly SRP');
 
 %% both plots
-tspan_pert = linspace(0, 1000*T, 100000);
+tspan_pert = linspace(0, 2000*T, 100000);
 
 [ T_Gauss, S_Gauss ] = ode113(@(t,s) eq_motion(t,s, @(t,s) acc_pert_fun_J2_SRP(t,s,mu_E,J2, R_E, initial_date, AMR, Cr, 2), mu_E), tspan_pert, kep0, options );
 
