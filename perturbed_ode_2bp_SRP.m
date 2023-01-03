@@ -27,6 +27,7 @@ rnorm = norm(r);
 AU = astroConstants(2); % Astronomical unit in meters
 mu_S = astroConstants(4);  % Gravitational parameter of the sun
 P_sun = 4.57*10^-6;% Solar radiation pressure at 1 AU
+R_E = astroConstants(23); %radius of earth
 
 % Convert time to days since the initial date
  initial_time=date2mjd2000(initial_date);% Convert initial date to modified Julian date
@@ -50,10 +51,13 @@ P_sun = 4.57*10^-6;% Solar radiation pressure at 1 AU
   acc_pert_vec_SRP= - acc_pert_SRP*(r_sc_Sun./norm(r_sc_Sun));
   r_E_sc=r;
   % If spacecraft is in Earth's shadow, set acceleration due to SRP to zero
-  if sign(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(r_sc_Sun)))==1 && (acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))<=70*pi/180 || acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))>= -70*pi/180)
-       % if the two vectors are in the same direction, within a cone of 160 deg,
-          % the SC is in the shadow cone
-       acc_pert_vec_SRP=zeros(3,1);
+  r_E_sc_norm = norm(r_E_sc);
+  r_E_sun_norm = norm(r_sc_Sun);
+  theta_tot = acos(dot(r_E_sc,r_sc_Sun)/(r_E_sc_norm*r_E_sun_norm));
+  theta_1 = acos(R_E/r_E_sc_norm);
+  theta_2 = acos(R_E/r_E_sun_norm);
+  if(theta_1+theta_2<=theta_tot)
+      a_pert_vec_SRP = zeros(3,1);
   end
        
        

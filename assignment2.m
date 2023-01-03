@@ -119,7 +119,7 @@ tCPU_Cartesian_start = cputime;
 [ T_J2, S_perturbed ] = ode113(@(t,s) perturbed_ode_2bp_SRP(t,s, mu_E, J2, R_E, initial_date, AMR, Cr, 2), tspan_pert, y0, options );
 tCPU_Cartesian = cputime - tCPU_Cartesian_start;
 time_computation = toc (t);
-%%
+
 % plotting perturbed orbit (1)
 figure
 earth_sphere
