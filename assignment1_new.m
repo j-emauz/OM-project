@@ -16,7 +16,7 @@ m_Sun=mu_S/G;
 m_E=mu_E/G;
 
 % data
-dept1=[2035,01,30,0,0,0]; %GIVEN
+dept1=[2032,01,30,0,0,0]; %GIVEN
 arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
 % unused
 
@@ -139,9 +139,9 @@ m3=min(min(min(dv_tot)));
 
 rp_opt=rp(x,y,z);
 %% mission results
-dv_1(x,y)
-dv_2(x,y,z)
-Delta_vp(x,y,z)
+optimal_dv1=dv_1(x,y)
+optimal_dv2=dv_2(x,y,z)
+optimal_dvp=Delta_vp(x,y,z)
 optimal_departure=mjd20002date(tspan_dept(x))
 optimal_Saturn_arrival=mjd20002date(tspan_dept(x)+ToF1_vect(y))
 optimal_NEO_arrival=mjd20002date(tspan_dept(x)+ToF1_vect(y)+ToF2_vect(z))
@@ -181,12 +181,14 @@ Delta_t_FlyBy_days=Delta_t_FlyBy/3600/24;
 
 %% Porkchop plot Saturn
 clc
-
+figure
 [X, Y] = meshgrid(tspan_dept, tspan_dept+ToF1_vect);
 Z = dv_porkchop(X, Y, p1, p2, @dv_arc1,mu_S);
 
 V=1:2:30;
 contour(X./365.25 + 2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
+grid on
+grid minor
 c_porkchop_p=colorbar;
 c_porkchop_p.Label.String = ' Δv [s]';
 
@@ -206,12 +208,15 @@ hold on
 % scatter(tspan_dept(x)/365.25+2000,tspan_GA(y)/365.25+2000,300,'red','filled');
 
 %% Porkchop plot asteroid
+figure
 
 [X, Y] = meshgrid(tspan_dept+ToF1_vect, tspan_dept+ToF1_vect+ToF2_vect);
 Z = dv_porkchop(X, Y, p2,86, @dv_arcNEO,mu_S);
 
-V=4:30;
+V=0:30;
 contour(X./365.25 +2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
+grid on
+grid minor
 colorbar
 xlabel('Departure time [years]');
 ylabel('Arrival time [years]');
