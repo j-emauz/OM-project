@@ -22,6 +22,7 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R,  initial_date, AMR, 
     AU = astroConstants(2);% Astronomical Unit
     mu_S = astroConstants(4); % Gravitational parameter of the Sun
     P_sun = 4.57*10^-6; % Solar radiation pressure at 1 AU
+    R_E = astroConstants(23); %radius of earth
 
     % Calculate time in days since initial_date
      initial_time=date2mjd2000(initial_date);
@@ -65,9 +66,17 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R,  initial_date, AMR, 
     acc_pert_vec_SRP = R_3_om_th*R_1_i*R_3_Om*acc_pert_vec_SRP;
 
     % If spacecraft is in Earth's shadow, set acceleration due to SRP to zero
-     if sign(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(r_sc_Sun)))==1 && (acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))<=70*pi/180 || acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))>= -70*pi/180)
-        acc_pert_vec_SRP=zeros(3,1);
+    r_E_sc_norm = norm(r_E_sc);
+    r_E_sun_norm = norm(r_sc_Sun);
+    theta_tot = acos(dot(r_E_sc,r_sc_Sun)/(r_E_sc_norm*r_E_sun_norm));
+    theta_1 = acos(R_E/r_E_sc_norm);
+    theta_2 = acos(R_E/r_E_sun_norm);
+    if(theta_1+theta_2<=theta_tot)
+         a_pert_vec_SRP = zeros(3,1);
      end
+     %if sign(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(r_sc_Sun)))==1 && (acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))<=70*pi/180 || acos(dot(r_E_sc./norm(r_E_sc),-r_sc_Sun./norm(-r_sc_Sun)))>= -70*pi/180)
+     %   acc_pert_vec_SRP=zeros(3,1);
+     %end
      
      % Select which perturbation to consider based on Perturbations flag
      if Perturbations==0
