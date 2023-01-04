@@ -185,7 +185,7 @@ figure
 [X, Y] = meshgrid(tspan_dept, tspan_dept+ToF1_vect);
 Z = dv_porkchop(X, Y, p1, p2, @dv_arc1,mu_S);
 
-V=1:2:30;
+V=1:2:20;
 contour(X./365.25 + 2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
 grid on
 grid minor
@@ -198,22 +198,22 @@ title('Transfer to Saturn Porkchop plot');
 hold on;
 scatter(tspan_dept(x)/365.25+2000,(tspan_dept(x)+ToF1_vect(y))/365.25+2000,25,'red','filled');
 
-figure
-grid off
-surface(X./365.25 + 2000,Y./365.25 + 2000,Z)
-colorbar
-xlabel('Departure time [years]');
-ylabel('Arrival time [years]');
-hold on
+% figure
+% grid off
+% surface(X./365.25 + 2000,Y./365.25 + 2000,Z)
+% colorbar
+% xlabel('Departure time [years]');
+% ylabel('Arrival time [years]');
+% hold on
 % scatter(tspan_dept(x)/365.25+2000,tspan_GA(y)/365.25+2000,300,'red','filled');
 
 %% Porkchop plot asteroid
-figure
+figure()
 
 [X, Y] = meshgrid(tspan_dept+ToF1_vect, tspan_dept+ToF1_vect+ToF2_vect);
 Z = dv_porkchop(X, Y, p2,86, @dv_arcNEO,mu_S);
 
-V=0:30;
+V=2:30;
 contour(X./365.25 +2000 , Y./365.25 + 2000, Z, V,'ShowText','on');
 grid on
 grid minor
@@ -254,6 +254,7 @@ scatter((tspan_dept(x)+ToF1_vect(y))/365.25+2000,(tspan_dept(x)+ToF1_vect(y)+ToF
 % % scatter(tspan_dept(x)/365.25+2000,tspan_arrt(z)/365.25+2000,20,'red','filled');
 
 %% Plot the planetocentric hyperbolic arcs:
+figure()
 earth_sphere
 hold on
 grid on
