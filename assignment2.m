@@ -155,6 +155,52 @@ for j=1:size(S_Gauss,1)
     [r_Gauss(j,:), ~] = par2car(S_Gauss(j,1), S_Gauss(j,2), S_Gauss(j,3), S_Gauss(j,4), S_Gauss(j,5), S_Gauss(j,6), mu_E);
 end
 
+%% Perturbed Ground Tracks
+omega_E=15.04 *pi/180/3600; %[rad/s]
+theta_G0=0;
+t0=0;
+
+AMR= 10.000; %[m^2/kg]
+P_sun=4.5*10^-6; %[N/m^2]
+Cr=1; 
+initial_date=[2022,03,21,12,0,0];
+
+% 1 Orbit:
+n_orbits=1;
+[lon1,lat1]=groundTrack_perturbed(T,n_orbits,theta_G0,initial_date, AMR, Cr, kep0,t0);
+hold on; 
+title('Ground Track perturbed 2BP - 1 orbit');
+% 1 day: 
+n_orbits=24*3600/T;
+[lon2,lat2]=groundTrack_perturbed(T,n_orbits,theta_G0,initial_date, AMR, Cr, kep0,t0);
+hold on; 
+title('Ground Track perturbed 2BP - 1 day');
+
+% 10 days: 
+n_days=10;
+n_orbits=n_days*24*3600/T;
+[lon3,lat3]=groundTrack_perturbed(T,n_orbits,theta_G0, initial_date, AMR, Cr, kep0,t0);
+hold on; 
+title('Ground Track perturbed 2BP - 10 days');
+hold off;
+
+%% Perturbed repeated Ground Track:
+% k = revolutions of the satellite;
+% m = rotations of the planet;
+
+%Using the ratio k/m assigned: 
+k=7;
+m=4;
+ratio=k/m;
+n_orbits=k;
+n_SC=omega_E*ratio; %[rad/s]
+a_repeating=(mu_E/n_SC^2)^(1/3);
+T_repeating=2*pi/omega_E*1/ratio;
+
+[lon4,lat4]=groundTrack_perturbed(T,n_orbits,theta_G0, initial_date, AMR, Cr, kep0,t0);
+hold on; 
+title('Repeated Ground Track unperturbed 2BP - Given ratio k/m=7/4');
+hold off;
 %% plot orbit
 % hold on
 % plot3( r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3));
@@ -191,7 +237,8 @@ fontsize(gca, scale=1.2)
 % comet3(r_Gauss(:,1), r_Gauss(:,2), r_Gauss(:,3))
 % title('Perturbed orbit using Cartesian coordinates');
 % hold off
-%% 
+%% error plots
+
 % Semi-Major Axis, a
 figure
 N = 100;
