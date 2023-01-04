@@ -170,6 +170,7 @@ n_orbits=1;
 [lon1,lat1]=groundTrack_perturbed(T,n_orbits,theta_G0,initial_date, AMR, Cr, kep0,t0);
 hold on; 
 title('Ground Track perturbed 2BP - 1 orbit');
+
 % 1 day: 
 n_orbits=24*3600/T;
 [lon2,lat2]=groundTrack_perturbed(T,n_orbits,theta_G0,initial_date, AMR, Cr, kep0,t0);
@@ -199,7 +200,7 @@ T_repeating=2*pi/omega_E*1/ratio;
 
 [lon4,lat4]=groundTrack_perturbed(T,n_orbits,theta_G0, initial_date, AMR, Cr, kep0,t0);
 hold on; 
-title('Repeated Ground Track unperturbed 2BP - Given ratio k/m=7/4');
+title('Repeating Ground Track perturbed 2BP - Given ratio k/m=7/4');
 hold off;
 %% plot orbit
 % hold on

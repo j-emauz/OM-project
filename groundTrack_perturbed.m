@@ -43,7 +43,7 @@ img = imread('land_shallow_topo_2048.tif');
 % img= flip(img,1);  % Flips the rows, making an upside-down image;
 image([-180 180],[-90 90],flip(img));
 hold on;
-plot(lon_deg,lat_deg,'green', LineStyle='none',Marker='.', MarkerSize=7);
+plot(lon_deg,lat_deg,'green', LineStyle='none',Marker='.', MarkerSize=4);
 hold on;
 plot(lon(1)*(180/pi),lat(1)*(180/pi),'o',MarkerSize=10,LineWidth=3, Color='green');
 hold on;

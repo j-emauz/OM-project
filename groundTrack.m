@@ -17,7 +17,7 @@ mu_E = astroConstants(13);
 tspan=linspace(0, n_orbits*T_sat, 100000);
 
 options = odeset( 'RelTol', 2.3e-14, 'AbsTol', 1e-14 );
-[ T, Y ] = ode113(@(t,y)ode_2bp(t,y,mu_E), tspan, y0, options );
+[ T, Y ] = ode113(@(t,y)ode_2bp(t,y,mu_E), tspan, y0, options);
 
 delta=asin(Y(:,3)./vecnorm(Y(:,1:3),2,2));
 alpha=atan2(Y(:,2), Y(:,1));
@@ -46,7 +46,7 @@ img = imread('land_shallow_topo_2048.tif');
 % img= flip(img,1);  % Flips the rows, making an upside-down image;
 image([-180 180],[-90 90],flip(img));
 hold on;
-plot(lon_deg,lat_deg,'green', LineStyle='none',Marker='.', MarkerSize=7);
+plot(lon_deg,lat_deg,'green', LineStyle='none',Marker='.', MarkerSize=4);
 hold on;
 plot(lon(1)*(180/pi),lat(1)*(180/pi),'o',MarkerSize=10,LineWidth=3, Color='green');
 hold on;
