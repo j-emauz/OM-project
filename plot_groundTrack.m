@@ -1,7 +1,30 @@
 function [lon,lat]=plot_groundTrack(T_sat,n_orbits,theta_G0, y0,t0)
-
+%PLOT_GROUNDTRACK Plots the ground track of a satellite given its initial
+%conditions and the number of orbits it will perform
+%
+% The function uses the function ode_2bp to solve the 2-body problem
+% using the ode113 algorithm. It then computes the longitude and
+% latitude of the satellite using the position vector obtained from the
+% integration. Finally, it plots the ground track of the satellite on
+% top of a map of the Earth.
+%
+% INPUT
+% - T_sat : period of the satellite [s]
+% - n_orbits: number of orbits performed by the satellite
+% - theta_G0: initial true anomaly of the satellite [rad]
+% - y0 : initial conditions of the satellite (1x6 array)
+% - t0 : initial time [s]
+%
+% OUTPUT
+% - lon : longitude of the satellite at each time step [rad]
+% - lat : latitude of the satellite at each time step [rad]
+%
 % k revolutions of the satellite
 % m rotations of the planet
+% Author:
+% Name: Mariangela Testa, Oleksii Stepaniuk, João Emauz, Saverio Franzese
+% Email: mariangela.testa@mail.polimi.it, oleksii.stepaniuk@mail.polimi.it,
+% joao.emauz@mail.polimi.it, saverio.franzese@mail.polimi.it
 
 mu_E = astroConstants(13);
 omega_E=15.04 *pi/180/3600; %rad/s

@@ -1,5 +1,5 @@
 function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R,  initial_date, AMR, Cr, Perturbations)
-% INPUTS:
+% INPUT:
 % t - time (seconds)
 % s - state vector at current time (keplerian elements [a,e,i,Om,om,th]')
 % mu - gravitational parameter of central body
@@ -10,7 +10,7 @@ function acc_pert_vec = acc_pert_fun_J2_SRP( t, s, mu,J2,R,  initial_date, AMR, 
 % Cr - reflectivity
 % Perturbations - flag indicating which perturbations to include: 0: J2, 1: SRP, 2: J2+SRP
 %
-% OUTPUTS:
+% OUTPUT:
 % acc_pert_vec - acceleration vector due to perturbations in RSW (radial
 % -transversal-out of plane) frame
 %

@@ -1,5 +1,5 @@
 function dy = perturbed_ode_2bp_SRP( t, y, mu, J2, R, initial_date, AMR, Cr, Perturbations)
-%INPUTS
+% INPUTS
 % t: time
 % y: state, y = [position; velocity]
 % mu: gravitational parameter of the central body
@@ -16,6 +16,11 @@ function dy = perturbed_ode_2bp_SRP( t, y, mu, J2, R, initial_date, AMR, Cr, Per
 % - date2mjd2000: converts a date to the modified Julian date (2000 epoch)
 % - uplanet: computes the Keplerian elements of a planet in SCE frame
 % - par2car: converts Keplerian elements to Cartesian coordinates
+% 
+% Author:
+% Name: Mariangela Testa, Oleksii Stepaniuk, João Emauz, Saverio Franzese
+% Email: mariangela.testa@mail.polimi.it, oleksii.stepaniuk@mail.polimi.it,
+% joao.emauz@mail.polimi.it, saverio.franzese@mail.polimi.it
 
 % Position and velocity
 r = y(1:3);

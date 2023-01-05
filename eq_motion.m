@@ -10,6 +10,11 @@ function ds = eq_motion( t, s, acc_pert_fun_J2_SRP, mu)
     % FUNCTIONS USED:
     % - acc_pert_fun_J2_SRP: function handle, calculates perturbing accelerations
     
+% Authors
+% Name: Mariangela Testa, Oleksii Stepaniuk, João Emauz, Saverio Franzese
+% Email: mariangela.testa@mail.polimi.it, oleksii.stepaniuk@mail.polimi.it,
+% joao.emauz@mail.polimi.it, saverio.franzese@mail.polimi.it
+
     % Evaluate the perturbing accelerations
     acc_pert = acc_pert_fun_J2_SRP( t, s );
 

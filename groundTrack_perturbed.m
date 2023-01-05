@@ -11,6 +11,10 @@ function [lon,lat]=groundTrack_perturbed(T_sat,n_orbits,theta_G0,initial_date, A
 % lon: longitude with respect to rotating Earth (0 deg at Greenwich meridian)
 % lat: latitude with respect to rotating Earth
 
+% Authors
+% Name: Mariangela Testa, Oleksii Stepaniuk, João Emauz, Saverio Franzese
+% Email: mariangela.testa@mail.polimi.it, oleksii.stepaniuk@mail.polimi.it,
+% joao.emauz@mail.polimi.it, saverio.franzese@mail.polimi.it
 omega_E=15.04 *pi/180/3600; %rad/s
 R_E=astroConstants(23);
 mu_E = astroConstants(13);

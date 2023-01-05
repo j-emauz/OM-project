@@ -1,5 +1,28 @@
 function [rp, Delta_vp,vp_minus,vp_plus,v_inf_minus,v_inf_plus] = PGA (V_P,V_minus,V_plus,rp_min,mu)
-
+% PGA: Calculates the optimal planetary flyby radius and corresponding velocities.
+%
+% INPUT:
+% V_P = Velocity of the planet [km/s]
+% V_minus = Initial velocity of spacecraft [km/s]
+% V_plus = Final velocity of spacecraft [km/s]
+% rp_min = Minimum flyby radius [km]
+% mu = Gravitational parameter of the central body [km^3/s^2]
+%
+% OUTPUT:
+% rp = Optimal planetary flyby radius [km]
+% Delta_vp = Powered flyby delta velocity [km/s]
+% vp_minus = Velocity of spacecraft before flyby [km/s]
+% vp_plus = Velocity of spacecraft after flyby [km/s]
+% v_inf_minus = Flyby asymptotic velocity in the direction of V_minus [km/s]
+% v_inf_plus = Flyby asymptotic velocity in the direction of V_plus [km/s]
+%
+% USAGE:
+% [rp, Delta_vp,vp_minus,vp_plus,v_inf_minus,v_inf_plus] = PGA(V_P,V_minus,V_plus,rp_min,mu)
+%
+% Author:
+% Name: Mariangela Testa, Oleksii Stepaniuk, João Emauz, Saverio Franzese
+% Email: mariangela.testa@mail.polimi.it, oleksii.stepaniuk@mail.polimi.it,
+% joao.emauz@mail.polimi.it, saverio.franzese@mail.polimi.it
 options = optimset('TolFun',1e-14,'Display','off');
 
 

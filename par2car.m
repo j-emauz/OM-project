@@ -31,7 +31,10 @@ function [rr, vv] = par2car(a, e, i, OM, om, theta, mu)
 %                    spazio rispetto al sistema ECI                                       
 % - vv [km/s]:       vettore che mi da la velocità del satellite nel punto 
 %                    indicato da rr rispetto al sistema ECI                                  
-%                                                                         
+% Author:
+% Name: Mariangela Testa
+% Email: mariangela.testa@mail.polimi.it
+%                                                                     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% 1 Calcolo semilato retto
