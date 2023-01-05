@@ -252,7 +252,7 @@ fontsize(gca, scale=1.2)
 % title('semi-major axis');
 
 a_error = (abs(a_p-S_Gauss(:,1)'))/kep0(1);
-max(a_error)
+a_max_error = max(a_error)
 
 figure
 grid on
