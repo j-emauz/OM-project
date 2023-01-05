@@ -282,6 +282,7 @@ semilogy(T_Gauss/T,e_error);
 xlabel('Time [T]') 
 ylabel('$|e_{Car} - e_{Gauss}|$','Interpreter','Latex')
 fontsize(gca, scale=1.5)
+e_error_max = max(e_error);
 %title('eccentricity error');
 
 % % Inclination, i
@@ -302,6 +303,7 @@ semilogy(T_Gauss/T,i_error);
 xlabel('Time [T]') 
 ylabel('$|i_{Car} - i_{Gauss}|/2\pi$','Interpreter','Latex')
 fontsize(gca, scale=1.5)
+i_error_max = max(i_error);
 %title('inclination error');
 
 % % Right Ascension of the Ascending Node, OM
@@ -322,6 +324,7 @@ semilogy(T_Gauss/T,OM_error);
 xlabel('Time [T]') 
 ylabel('$|\Omega_{Car} - \Omega_{Gauss}|/2\pi$','Interpreter','Latex')
 fontsize(gca, scale=1.5)
+OM_error_max = max(OM_error);
 %title('Right Ascension of the Ascending Node error');
 
 % % Argument of pericenter, om
@@ -342,12 +345,13 @@ semilogy(T_Gauss/T,om_error);
 xlabel('Time [T]') 
 ylabel('$|\omega_{Car} - \omega_{Gauss}|/2\pi$','Interpreter','Latex')
 fontsize(gca, scale=1.5)
+omega_error_max = max(om_error);
 %title('argument of pericenter error');
 
 % % True Anomaly, theta
 % figure;
 S_Gauss(:, 6) = wrapToPi(S_Gauss(:,6));
-% th_p = wrapToPi(th_p);
+th_p = wrapToPi(th_p);
 % N = 100;
 % thmean = movmean(S_Gauss(:, 6), N);
 % plot(T_Gauss/T,S_Gauss(:,6));
@@ -356,7 +360,6 @@ S_Gauss(:, 6) = wrapToPi(S_Gauss(:,6));
 % plot(T_Gauss/T, thmean);
 % legend('Gauss','Cartesian','average')
 % title('true anomaly');
-
 th_error = (abs(S_Gauss(:,6)'-th_p))/(2*pi);
 figure
 grid on
@@ -364,6 +367,7 @@ semilogy(T_Gauss/T,th_error);
 xlabel('Time [T]') 
 ylabel('$|\theta_{Car} - \theta_{Gauss}|/2\pi$','Interpreter','Latex')
 fontsize(gca, scale=1.5)
+theta_error_max = max(th_error);
 %title('true anomaly error');
 
 %% Just J2 plots
