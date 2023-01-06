@@ -3,7 +3,7 @@ clear
 close all
 
 % constants
-% Get various constants from the astroConstants function
+% Getting various constants from the astroConstants function
 G=astroConstants(1); % gravitational constant
 mu_S = astroConstants(4); % Sun's gravitational parameter
 mu_Saturn = astroConstants(16); % Saturn's gravitational parameter
@@ -12,7 +12,7 @@ R_E= astroConstants(23); % Earth's radius
 AU= astroConstants(2); % 1 AU in meters
 R_Saturn=astroConstants(26); % Saturn's radius
 
-% Calculate masses of celestial bodies from their gravitational parameters
+% Calculating masses of celestial bodies from their gravitational parameters
 m_Saturn=mu_Saturn/G;
 m_Sun=mu_S/G;
 m_E=mu_E/G;
@@ -85,9 +85,6 @@ p2=6; %Saturn
 ToF1_vect=linspace(ToF1_min*365.25,ToF1_max*365.25,30); % time of flight for departure [days]
 ToF2_vect=linspace(ToF2_min*365.25,ToF2_max*365.25,30); % time of flight for arrival [days]
 
-%% grid search
-ToF1_vect=linspace(ToF1_min*365.25,ToF1_max*365.25,100); % Flyby times
-ToF2_vect=linspace(ToF2_min*365.25,ToF2_max*365.25,100); % Arrival times
 for i=1:length(tspan_dept) % Iterate through departure times
     i     
         for j=1:length(ToF1_vect) % Iterate through flyby times

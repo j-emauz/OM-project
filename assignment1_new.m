@@ -20,8 +20,6 @@ dept1=[2032,01,30,0,0,0]; %GIVEN
 arrt2=[2062,07,28,0,0,0]; % GIVEN latest arrival on the asteroid
 % unused
 
-% rp_min=R_E*21*1.2;
-% rp_min=480000*2.1
 rp_min=R_E*21;
 %% time windows
 
