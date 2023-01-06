@@ -1,4 +1,4 @@
-function [rp, Delta_vp,vp_minus,vp_plus,v_inf_minus,v_inf_plus] = PGA (V_P,V_minus,V_plus,rp_min,mu)
+function [rp, Delta_vp,vp_minus,vp_plus,v_inf_minus,v_inf_plus] = PGA (V_P,V_minus,V_plus,rp_min,mu, r_SOI)
 % PGA: Calculates the optimal planetary flyby radius and corresponding velocities.
 %
 % INPUT:
@@ -41,13 +41,15 @@ delta=acos(dot(v_inf_minus,v_inf_plus)/(norm(v_inf_minus)*norm(v_inf_plus)));
     
 rp=fzero(fun,[rp_min, 10^10], options);
 
+
+
 a_minus=rp/(1-ecc_minus(rp));
 a_plus=rp/(1-ecc_plus(rp));
 vp_minus=sqrt(2*mu*(1/rp-1/(2*a_minus)));
 vp_plus=sqrt(2*mu*(1/rp-1/(2*a_plus)));
 Delta_vp=abs(vp_plus-vp_minus);
 
-if rp < rp_min || isnan(rp)
+if (rp < rp_min || isnan(rp) || rp>r_SOI)
     Delta_vp=NaN;
 end 
 
