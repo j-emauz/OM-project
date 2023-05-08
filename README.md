@@ -1,3 +1,3 @@
 # OM project
  
-Orbital monkey
+Orbital Mechanics project on ground tracks, fly-bys, etc.
